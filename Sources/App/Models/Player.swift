@@ -6,30 +6,48 @@
 //
 
 import Vapor
+import Foundation
 import FluentSQLite
+import Authentication
 
-protocol PropertyDescribable: Reflectable {
-    associatedtype Object: Reflectable
-}
+final class Player: Codable {
+    var username: String
+    var email: String?
+    var password: String
+    var elo: Int
 
-extension PropertyDescribable {
-    static func describe<T>(withKeyPath keyPath: KeyPath<Object, T>) throws -> String? {
-        guard let property = try Object.reflectProperty(forKey: keyPath)?.description.split(separator: ":")[0] else {
-            return nil
+    init(username: String, email: String?, password: String, elo: Int = 1300) {
+        self.username = username
+        self.email = email
+        self.password = password
+        self.elo = elo
+    }
+
+    final class Public: Codable {
+        var username: String
+        var email: String?
+        let elo: Int
+
+        init(username: String, email: String?, elo: Int) {
+            self.username = username
+            self.email = email
+            self.elo = elo
         }
-        return String(property)
     }
 }
 
-struct Player: Codable {
-    let name: String
-    var email: String?
-    let elo: Int
+extension Player.Public: Content {}
+extension Player {
+    func convertToPublic() -> Player.Public {
+        return Player.Public(username: username, email: email, elo: elo)
+    }
+}
 
-    init(name: String, email: String?, elo: Int = 1300) {
-        self.name = name
-        self.email = email
-        self.elo = elo
+extension Future where T: Player {
+    func convertToPublic() -> Future<Player.Public> {
+        return self.map(to: Player.Public.self) { player in
+            return player.convertToPublic()
+        }
     }
 }
 
@@ -38,9 +56,17 @@ extension Player: Model {
     typealias ID = String
     public static var idKey: IDKey = \Player.email //database key
 }
-extension Player: Content {}
-extension Player: Parameter {}
-extension Player: Migration {}
+
 extension Player: PropertyDescribable {
     typealias Object = Player
 }
+
+extension Player: BasicAuthenticatable {
+    // 2
+    static let usernameKey: UsernameKey = \Player.username
+    // 3
+    static let passwordKey: PasswordKey = \Player.password
+}
+extension Player: Content {}
+extension Player: Parameter {}
+extension Player: Migration {}
