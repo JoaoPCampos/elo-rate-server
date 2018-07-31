@@ -62,11 +62,14 @@ extension Player: PropertyDescribable {
 }
 
 extension Player: BasicAuthenticatable {
-    // 2
     static let usernameKey: UsernameKey = \Player.username
-    // 3
     static let passwordKey: PasswordKey = \Player.password
 }
+
+extension Player: TokenAuthenticatable {
+    typealias TokenType = Token
+}
+
 extension Player: Content {}
 extension Player: Parameter {}
 extension Player: Migration {}

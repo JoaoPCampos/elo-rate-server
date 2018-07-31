@@ -7,13 +7,18 @@ public func routes(_ router: Router) throws {
 
     let basicAuthMiddleware = Player.basicAuthMiddleware(using: BCryptDigest())
     let guardAuthMiddleware = Player.guardAuthMiddleware()
+    let tokenAuthMiddleware = Player.tokenAuthMiddleware()
+
+    router
+        .grouped(basicAuthMiddleware, guardAuthMiddleware)
+        .post("rankingAPI", "v1", "login", use: CrudController.login)
 
     router
 //        .grouped(basicAuthMiddleware, guardAuthMiddleware)
         .post("rankingAPI", "v1", "player", use: CrudController.create)
 
     router
-        .grouped(basicAuthMiddleware, guardAuthMiddleware)
+        .grouped(tokenAuthMiddleware, guardAuthMiddleware)
         .get("rankingAPI", "v1", "players", use: CrudController.list)
 
     router

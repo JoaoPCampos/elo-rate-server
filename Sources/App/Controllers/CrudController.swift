@@ -10,6 +10,19 @@ import Crypto
 
 final class CrudController {
 
+    static func login(_ request: Request) throws -> Future<Token> {
+        let player = try request.requireAuthenticated(Player.self)
+        let newToken = try Token.generate(for: player)
+
+        guard let email = player.email else { throw Abort(.unauthorized, reason: "Bad credentials") }
+
+        return Token
+            .find(email, on: request)
+            .flatMap({ (token) -> EventLoopFuture<Token> in
+                return (token != nil) ? newToken.save(on: request) : newToken.create(on: request)
+            })
+    }
+
     static func update(_ request: Request) throws -> Future<Player.Public> {
         // get player email from query param
         guard let userEmail = request.query[String.self, at: "email"] else {
@@ -38,6 +51,8 @@ final class CrudController {
     }
 
     static func list(_ request: Request) throws -> Future<[Player.Public]> {
+        let _ = try request.requireAuthenticated(Player.self).requireID()
+
         return Player.query(on: request).all().map({ players -> [Player.Public] in
             return players.map { $0.convertToPublic() }
         })
