@@ -1,22 +1,35 @@
 import Vapor
 import Fluent
+import Authentication
 
 /// Register your application's routes here.
 public func routes(_ router: Router) throws {
-    // Basic "Hello, world!" example
-    router.get("hello") { req in
-        return "Hello, world!"
-    }
 
-    router.post("api", "v1", "player") { req -> Future<Player> in
-        return try req.content.decode(Player.self).create(on: req)
-    }
+    let basicAuthMiddleware = Player.basicAuthMiddleware(using: BCryptDigest())
+    let guardAuthMiddleware = Player.guardAuthMiddleware()
+    let tokenAuthMiddleware = Player.tokenAuthMiddleware()
 
-    router.get("api", "v1", "players") { req -> Future<[Player]> in
-        return Player.query(on: req).all()
-    }
+    router
+        .grouped(basicAuthMiddleware, guardAuthMiddleware)
+        .post("rankingAPI", "v1", "login", use: CrudController.login)
 
-//    // Example of configuring a controller
+    router
+//        .grouped(basicAuthMiddleware, guardAuthMiddleware)
+        .post("rankingAPI", "v1", "player", use: CrudController.create)
+
+    router
+        .grouped(tokenAuthMiddleware, guardAuthMiddleware)
+        .get("rankingAPI", "v1", "players", use: CrudController.list)
+
+    router
+        .grouped(tokenAuthMiddleware, guardAuthMiddleware)
+        .put("rankingAPI", "v1", "player", use: CrudController.update)
+
+    router
+        .grouped(tokenAuthMiddleware, guardAuthMiddleware)
+        .post("rankingAPI", "v1", "game", use: CrudController.createGame)
+
+
 //    let todoController = TodoController()
 //    router.get("todos", use: todoController.index)
 //    router.post("todos", use: todoController.create)
