@@ -73,4 +73,11 @@ final class CrudController {
             }).create(on: request).convertToPublic()
     }
 
+    static func createGame(_ request: Request) throws -> Future<Game.Public> {
+        return try request
+            .content
+            .decode(Game.self)
+            .create(on: request).convertToPublic()
+    }
+
 }

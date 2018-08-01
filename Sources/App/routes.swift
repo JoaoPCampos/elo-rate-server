@@ -22,8 +22,12 @@ public func routes(_ router: Router) throws {
         .get("rankingAPI", "v1", "players", use: CrudController.list)
 
     router
-        .grouped(basicAuthMiddleware, guardAuthMiddleware)
+        .grouped(tokenAuthMiddleware, guardAuthMiddleware)
         .put("rankingAPI", "v1", "player", use: CrudController.update)
+
+    router
+        .grouped(tokenAuthMiddleware, guardAuthMiddleware)
+        .post("rankingAPI", "v1", "game", use: CrudController.createGame)
 
 
 //    let todoController = TodoController()

@@ -11,27 +11,37 @@ import FluentSQLite
 import Authentication
 
 final class Player: Codable {
-    var username: String
     var email: String?
+    var username: String
     var password: String
-    var elo: Int
 
-    init(username: String, email: String?, password: String, elo: Int = 1300) {
+    let elo: Int
+    let wins: Int
+    let losses: Int
+
+    init(username: String, email: String?, password: String, elo: Int = 1300, wins: Int = 0, losses: Int = 0) {
         self.username = username
         self.email = email
         self.password = password
         self.elo = elo
+        self.wins = wins
+        self.losses = losses
     }
 
     final class Public: Codable {
         var username: String
         var email: String?
-        let elo: Int
 
-        init(username: String, email: String?, elo: Int) {
+        let elo: Int
+        let wins: Int
+        let losses: Int
+
+        init(username: String, email: String?, elo: Int, wins: Int, losses: Int) {
             self.username = username
             self.email = email
             self.elo = elo
+            self.wins = wins
+            self.losses = losses
         }
     }
 }
@@ -39,7 +49,7 @@ final class Player: Codable {
 extension Player.Public: Content {}
 extension Player {
     func convertToPublic() -> Player.Public {
-        return Player.Public(username: username, email: email, elo: elo)
+        return Player.Public(username: username, email: email, elo: elo, wins: wins, losses: losses)
     }
 }
 
@@ -54,7 +64,7 @@ extension Future where T: Player {
 extension Player: Model {
     typealias Database = SQLiteDatabase
     typealias ID = String
-    public static var idKey: IDKey = \Player.email //database key
+    public static var idKey: IDKey = \Player.email
 }
 
 extension Player: PropertyDescribable {
