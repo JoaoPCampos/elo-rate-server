@@ -28,15 +28,16 @@ struct Rating {
 
         if elo > KFactor.high.rawValue {
             return 16
+
         } else if elo > KFactor.medium.rawValue {
             return 24
+            
         } else {
             return 32
         }
     }
 
     func calculate(versusElo challengerElo: Int) -> Int {
-
         let exh_elo = pow(10.0, self.elo/400.0)
         let exh_challengerElo = pow(10.0, CGFloat(challengerElo)/400.0)
         let expectedOutcome = exh_elo / (exh_elo + exh_challengerElo)

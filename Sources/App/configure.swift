@@ -32,8 +32,10 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     /// Configure migrations
     var migrations = MigrationConfig()
     migrations.add(model: Player.self, database: .sqlite)
+    migrations.add(model: AdminPlayer.self, database: .sqlite)
     migrations.add(model: Token.self, database: .sqlite)
     migrations.add(model: Game.self, database: .sqlite)
+    migrations.add(migration: Admin.self, database: .sqlite) //creates an admin at server start
     services.register(migrations)
 
 }

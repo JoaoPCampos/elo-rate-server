@@ -8,7 +8,6 @@
 import Vapor
 import Foundation
 import FluentSQLite
-import Authentication
 
 final class Game: Codable {
     var id: Int?
@@ -27,7 +26,6 @@ final class Game: Codable {
     }
 
     final class Public: Codable {
-
         let name: String
         let challenger: String
         let contender: String
