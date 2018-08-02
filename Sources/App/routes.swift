@@ -22,20 +22,33 @@ private func authRoutes(_ router: Router) {
 
 private func playerRoutes(_ router: Router) {
     router
-        .grouped(Middlewares.adminBasicAuth)
         .post("ranking", "api", "v1.0", "player", use: PlayerController.create)
 
     router
-        .grouped(Middlewares.playerTokenAuth)
         .get("ranking", "api", "v1.0", "players", use: PlayerController.list)
 
     router
-        .grouped(Middlewares.playerTokenAuth)
-        .put("ranking", "api", "v1.0", "player", use: PlayerController.update)
+        .get("ranking", "api", "v1.0", "player", use: PlayerController.get)
 }
 
 private func gameRoutes(_ router: Router) {
     router
         .grouped(Middlewares.playerTokenAuth)
         .post("ranking", "api", "v1.0", "game", use: GameController.create)
+
+    router
+        .grouped(Middlewares.playerTokenAuth)
+        .post("ranking", "api", "v1.0", "game", "accept", use: GameController.accept)
+
+    router
+        .grouped(Middlewares.playerTokenAuth)
+        .get("ranking", "api", "v1.0", "games", use: GameController.list)
+
+    router
+        .grouped(Middlewares.playerTokenAuth)
+        .get("ranking", "api", "v1.0", "game","winner", use: GameController.updateWinner)
+
+    router
+        .grouped(Middlewares.playerTokenAuth)
+        .get("ranking", "api", "v1.0", "game","loser", use: GameController.updateLoser)
 }

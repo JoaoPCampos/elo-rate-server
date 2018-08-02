@@ -9,6 +9,13 @@ import Vapor
 import Foundation
 import FluentSQLite
 
+enum GameStatus: Int {
+    case pending = 0
+    case accepted
+    case completed
+    case aborted
+}
+
 final class Game: Codable {
     var id: Int?
     var challengerId: String
@@ -16,24 +23,28 @@ final class Game: Codable {
     let name: String
     let challenger: String
     let contender: String
-
-    init(name: String, challengerId: String, contenderId: String, challenger: String, contender: String) {
+    let status: Int
+    
+    init(name: String, challengerId: String, contenderId: String, challenger: String, contender: String, status: Int = GameStatus.pending.rawValue) {
         self.name = name
         self.challengerId = challengerId
         self.contenderId = contenderId
         self.challenger = challenger
         self.contender = contender
+        self.status = status
     }
-
+    
     final class Public: Codable {
         let name: String
         let challenger: String
         let contender: String
-
-        init(name: String, challenger: String, contender: String) {
+        let status: Int
+        
+        init(name: String, challenger: String, contender: String, status: Int) {
             self.name = name
             self.challenger = challenger
             self.contender = contender
+            self.status = status
         }
     }
 }
@@ -51,7 +62,7 @@ extension Game.Public: Content {}
 
 extension Game {
     func convertToPublic() -> Game.Public {
-        return Game.Public(name: name, challenger: challenger, contender: contender)
+        return Game.Public(name: name, challenger: challenger, contender: contender, status: status)
     }
 }
 

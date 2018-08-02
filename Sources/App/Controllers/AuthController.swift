@@ -9,32 +9,35 @@ import Vapor
 import Crypto
 
 final class AuthController {
-  static func login(_ request: Request) throws -> Future<Token> {
-    let player = try request.requireAuthenticated(Player.self)
-    let newToken = try Token.generate(for: player)
-
-    guard let email = player.email else { throw Abort(.unauthorized, reason: "Bad credentials") }
-
-    return Token
-      .find(email, on: request)
-      .flatMap({ (token) -> EventLoopFuture<Token> in
-        return (token != nil) ? newToken.save(on: request) : newToken.create(on: request)
-      })
-  }
-
-  static func logout(_ request: Request) throws -> Future<HTTPStatus> {
-    guard let tokenId = request.query[String.self, at: "tokenId"] else {
-      throw Abort(.badRequest, reason: "Bad url path")
+    
+    static func login(_ request: Request) throws -> Future<Token> {
+        let player = try request.requireAuthenticated(Player.self)
+        let newToken = try Token.generate(for: player)
+        
+        guard let email = player.email else { throw Abort(.unauthorized, reason: "unauthorized Player") }
+        
+        return Token
+            .find(email, on: request)
+            .flatMap({ (token) -> EventLoopFuture<Token> in
+                return (token != nil) ? newToken.save(on: request) : newToken.create(on: request)
+            })
     }
-    return Token
-      .find(tokenId, on: request)
-      .map({ token -> Token in
-        guard let token = token else {
-          throw Abort(.notFound, reason: "Token with id: \(tokenId) not found.")
+    
+    static func logout(_ request: Request) throws -> Future<HTTPStatus> {
+        guard let email = try request.requireAuthenticated(Player.self).email else {
+            throw Abort(.unauthorized, reason: "unauthorized Player")
         }
-        return token
-      })
-      .delete(on: request)
-      .transform(to: .ok)
-  }
+        
+        return Token
+            .query(on: request)
+            .all()
+            .map ({ (tokens) -> Token in
+                guard let token = tokens.filter( { token in token.playerId == email } ).first else {
+                    throw Abort(.notFound, reason: "Token for player email \(email) not found.")
+                }
+                return token
+                
+            }).delete(on: request)
+            .transform(to: .ok)
+    }
 }

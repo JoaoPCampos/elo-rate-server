@@ -15,17 +15,17 @@ final class AdminPlayer: Codable {
     var email: String?
     var username: String
     var password: String
-
+    
     init(username: String, email: String?, password: String) {
         self.username = username
         self.email = email
         self.password = password
     }
-
+    
     final class Public: Codable {
         var username: String
         var email: String?
-
+        
         init(username: String, email: String?) {
             self.username = username
             self.email = email
@@ -73,12 +73,12 @@ struct Admin: Migration {
             fatalError("Failed to create admin user")
         }
         let adminPlayer = AdminPlayer(username: "j0cs_Admin",
-                            email: "admin@email.com",
-                            password: hashedPassword)
+                                      email: "admin@email.com",
+                                      password: hashedPassword)
         
         return adminPlayer.create(on: connection).transform(to: ())
     }
-
+    
     static func revert(on connection: SQLiteConnection) -> Future<Void> {
         return .done(on: connection)
     }
