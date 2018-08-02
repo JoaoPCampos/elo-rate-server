@@ -33,6 +33,14 @@ final class Game: Codable {
         self.contender = contender
         self.status = status
     }
+
+    final class Create: Codable {
+        let name: String
+
+        init(name: String, contenderId: String) {
+            self.name = name
+        }
+    }
     
     final class Public: Codable {
         let name: String

@@ -13,7 +13,7 @@ final class PlayerController {
     static func create(_ request: Request) throws -> Future<Player.Public> {
         return try request
             .content
-            .decode(Player.self)
+            .decode(Player.Create.self)
             .map({ player -> Player in
 
                 let encriptedPassword = try BCrypt.hash(player.password)
