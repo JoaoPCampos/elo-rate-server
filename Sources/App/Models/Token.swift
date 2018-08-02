@@ -14,7 +14,7 @@ final class Token: Codable {
     var id: String?
     var token: String
     var playerId: Player.ID
-
+    
     init(token: String, playerId: Player.ID) {
         self.token = token
         self.playerId = playerId
@@ -25,7 +25,7 @@ final class Token: Codable {
 extension Token {
     static func generate(for user: Player) throws -> Token {
         let random = try CryptoRandom().generateData(count: 16)
-
+        
         return try Token(
             token: random.base64EncodedString(),
             playerId: user.requireID())
@@ -35,7 +35,7 @@ extension Token {
 extension Token: Model {
     typealias Database = SQLiteDatabase
     typealias ID = String
-
+    
     public static var idKey: IDKey = \Token.id
 }
 
