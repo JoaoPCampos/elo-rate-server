@@ -10,7 +10,7 @@ import Crypto
 
 final class AuthController {
     
-    static func login(_ request: Request) throws -> Future<Token> {
+    static func login(_ request: Request) throws -> Future<Token.Public> {
         let player = try request.requireAuthenticated(Player.self)
         let newToken = try Token.generate(for: player)
         
@@ -20,7 +20,7 @@ final class AuthController {
             .find(email, on: request)
             .flatMap({ (token) -> EventLoopFuture<Token> in
                 return (token != nil) ? newToken.save(on: request) : newToken.create(on: request)
-            })
+            }).convertToPublic()
     }
     
     static func logout(_ request: Request) throws -> Future<HTTPStatus> {
@@ -32,7 +32,7 @@ final class AuthController {
             .query(on: request)
             .all()
             .map ({ (tokens) -> Token in
-                guard let token = tokens.filter( { token in token.playerId == email } ).first else {
+                guard let token = tokens.filter( { token in token.email == email } ).first else {
                     throw Abort(.notFound, reason: "Token for player email \(email) not found.")
                 }
                 return token
