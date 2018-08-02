@@ -1,0 +1,173 @@
+FORMAT: 1A
+
+# EloRanking
+
+Elo ranking is a simple API allowing consumers to create players, games and update rankings.
+
+## Auth Services [/auth]
+
+### Login Player [POST /ranking/api/v1.0/auth/login]
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Basic YTph (basic auth uses username:password encode base 64)
+        
+
++ Response 200 (application/json)
+
+        {
+            "token": "Nl/1B3AL2iYQfn+h05FLKw==",
+            "email": "email@email.com"
+        }
+        
+### Logout Player [DELETE /ranking/api/v1.0/auth/logout]
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+
++ Response 204
+
+## Player Services [/player]
+
+### Create Player [POST /ranking/api/v1.0/player]
+
++ Request (application/json)
+
+    + Body
+        {
+            "username": "Username",
+            "email": "email@email.com",
+            "password": "password"
+        }
+
++ Response 201 (application/json)
+
+    + Headers
+    
+
+    + Body
+
+            {
+                "email": "email@email.com",
+                "username": "Username",
+                "losses": 0,
+                "elo": 1300,
+                "wins": 0
+            }
+
+### List Players [GET /ranking/api/v1.0/players]
+
++ Request (application/json)
+
+    + Headers
+    
++ Response 201 (application/json)
+    
+
+    + Body
+        [{
+            "email": "email@email.com",
+            "username": "Username",
+            "losses": 0,
+            "elo": 1300,
+            "wins": 0
+        }]
+            
+### Find Player [GET /ranking/api/v1.0/player?playerId=ID]
+
++ Request (application/json)
+
+    + Headers
+    
++ Response 201 (application/json)
+    
+    + Body
+        {
+            "email": "email@email.com",
+            "username": "Username",
+            "losses": 0,
+            "elo": 1300,
+            "wins": 0
+        }
+
+## Game Services [/game]
+
+### Create Game [POST /ranking/api/v1.0/game?contenderId=ID]
+Creates a new Game versus the contender.
+
++ Request (application/json)
+
+    + Headers
+        Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+
+    + Body
+        {
+            "name": "Game playerA vs playerB"
+        }
+
++ Response 201 (application/json)
+
+    + Body
+        {
+            "contender": "email2@email2.com",
+            "status": 0,
+            "name": "Game playerA vs playerB",
+            "challenger": "email@email.com"
+        }
+
+### Accept Game [POST /ranking/api/v1.0/game/accept]
+Only a contender may accept the game created by the challenger player.
+Status is at 0 when game is created, accepting game turns status to 1,
+winning or losing the game turns the status to 2.
+
++ Request (application/json)
+
+    + Headers
+        Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+
++ Response 204
+
+### List Games [GET /ranking/api/v1.0/games]
+Lists all games of logged in player
+
++ Request (application/json)
+
+    + Headers
+        Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+
+
++ Response 201 (application/json)
+    
+
+    + Body
+        [{
+            "contender": "email2@email2.com",
+            "status": 0,
+            "name": "Game playerA vs playerB",
+            "challenger": "email@email.com"
+        }]
+
+### Win Game [POST /ranking/api/v1.0/game/winner]
+Only the challenger player who created the game may update the game as winner
+
++ Request (application/json)
+
+    + Headers
+        Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+
++ Response 204
+
+### Lose Game [POST /ranking/api/v1.0/game/loser]
+Only the challenger player who created the game may update the game as loser
+
++ Request (application/json)
+
+    + Headers
+        Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+
++ Response 204
