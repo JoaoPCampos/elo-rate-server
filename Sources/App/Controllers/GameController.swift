@@ -11,17 +11,19 @@ import Crypto
 final class GameController {
 
     static func create(_ request: Request) throws -> Future<Game.Public> {
+
+        guard let contenderId = request.query[String.self, at: "contenderId"] else {
+            throw Abort(.badRequest, reason: "Missing contender id")
+        }
+
         return try request
             .content
-            .decode(Game.self)
-            .map({ game -> Game in
-                guard game.challengerId != game.contenderId else {
-                    throw Abort(.conflict, reason: "Challenger \(game.challenger) must be different from contender \(game.contender)")
-                }
-
-                return game
+            .decode(Game.Create.self)
+            .map({ game -> Future<Game> in
+                return try create(game: game, versus: contenderId, request)
+            }).flatMap({ (newGame) -> EventLoopFuture<Game.Public> in
+                return newGame.convertToPublic()
             })
-            .create(on: request).convertToPublic()
     }
 
     static func accept(_ request: Request) throws -> Future<Game.Public> {
@@ -72,6 +74,25 @@ final class GameController {
 }
 
 extension GameController {
+
+    private static func create(game: Game.Create, versus contenderId: String, _ request: Request) throws -> Future<Game> {
+        let player = try request.requireAuthenticated(Player.self)
+        guard let email = player.email else { throw Abort(.unauthorized, reason: "unauthorized Player") }
+
+        guard player.email != contenderId else {
+            throw Abort(.conflict, reason: "Challenger \(player.username) must be different from contender.")
+        }
+
+        return try PlayerController
+            .getPlayer(byId: contenderId, request)
+            .map({ contender -> Game in
+                return Game(name: game.name,
+                            challengerId: email,
+                            contenderId: contenderId,
+                            challenger: player.username,
+                            contender: contender.username)
+            }).create(on: request)
+    }
 
     private static func update(_ request: Request, isWinner: Bool) throws -> Future<HTTPStatus> {
         let player = try request.requireAuthenticated(Player.self)

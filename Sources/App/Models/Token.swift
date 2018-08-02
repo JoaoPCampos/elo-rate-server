@@ -13,12 +13,22 @@ import Authentication
 final class Token: Codable {
     var id: String?
     var token: String
-    var playerId: Player.ID
+    var email: Player.ID
     
-    init(token: String, playerId: Player.ID) {
+    init(token: String, email: Player.ID) {
         self.token = token
-        self.playerId = playerId
-        self.id = playerId
+        self.email = email
+        self.id = email
+    }
+
+    final class Public: Codable {
+        var token: String
+        var email: Player.ID
+
+        init(token: String, email: Player.ID) {
+            self.token = token
+            self.email = email
+        }
     }
 }
 
@@ -28,7 +38,7 @@ extension Token {
         
         return try Token(
             token: random.base64EncodedString(),
-            playerId: user.requireID())
+            email: user.requireID())
     }
 }
 
@@ -41,7 +51,7 @@ extension Token: Model {
 
 extension Token: Authentication.Token {
     typealias UserType = Player
-    static let userIDKey: UserIDKey = \Token.playerId
+    static let userIDKey: UserIDKey = \Token.email
 }
 
 extension Token: BearerAuthenticatable {
@@ -50,3 +60,18 @@ extension Token: BearerAuthenticatable {
 
 extension Token: Migration {}
 extension Token: Content {}
+extension Token.Public: Content {}
+
+extension Token {
+    func convertToPublic() -> Token.Public {
+        return Token.Public(token: token, email: email)
+    }
+}
+
+extension Future where T: Token {
+    func convertToPublic() -> Future<Token.Public> {
+        return self.map(to: Token.Public.self) { token in
+            return token.convertToPublic()
+        }
+    }
+}

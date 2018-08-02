@@ -46,9 +46,9 @@ private func gameRoutes(_ router: Router) {
 
     router
         .grouped(Middlewares.playerTokenAuth)
-        .get("ranking", "api", "v1.0", "game","winner", use: GameController.updateWinner)
+        .put("ranking", "api", "v1.0", "game","winner", use: GameController.updateWinner)
 
     router
         .grouped(Middlewares.playerTokenAuth)
-        .get("ranking", "api", "v1.0", "game","loser", use: GameController.updateLoser)
+        .put("ranking", "api", "v1.0", "game","loser", use: GameController.updateLoser)
 }

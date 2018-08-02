@@ -28,6 +28,18 @@ final class Player: Codable {
         self.losses = losses
     }
 
+    final class Create: Codable {
+        let username: String
+        let email: String
+        let password: String
+
+        init(username: String, email: String, password: String) {
+            self.username = username
+            self.email = email
+            self.password = password
+        }
+    }
+
     final class Public: Codable {
         var username: String
         var email: String?
