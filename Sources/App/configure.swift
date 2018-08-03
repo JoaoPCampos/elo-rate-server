@@ -19,9 +19,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     var middlewares = MiddlewareConfig() // Create _empty_ middleware config
     middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
 
-//    /// Middleware for CORS
-//    let eloRankingCORS = EloRankingCORS()
-//    middlewares.use(eloRankingCORS.middleware())
+    /// Middleware for CORS
+    let eloRankingCORS = EloRankingCORS()
+    middlewares.use(eloRankingCORS.middleware())
 
     /// Register Middleware
     services.register(middlewares)
