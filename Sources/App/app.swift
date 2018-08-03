@@ -4,10 +4,11 @@ import Vapor
 public func app(_ env: Environment) throws -> Application {
     var config = Config.default()
     var env = env
-    var services = Services.default()
+    var services = Services.default()    
 
+    let eloRankingCORS = EloRankingCORS()
     var middlewareConfig = MiddlewareConfig()
-    middlewareConfig.use(EloRankingCORS.middleware)
+    middlewareConfig.use(eloRankingCORS.middleware())
     services.register(middlewareConfig)
 
     try configure(&config, &env, &services)

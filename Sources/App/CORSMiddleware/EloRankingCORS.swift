@@ -10,9 +10,7 @@ import Vapor
 
 final class EloRankingCORS {
     
-    static let middleware: CORSMiddleware = CORSMiddleware.init(configuration: configurationCORS())
-
-    static private func configurationCORS() -> CORSMiddleware.Configuration {
+    lazy private var eloRankingConfiguration: CORSMiddleware.Configuration = {
         return CORSMiddleware
             .Configuration
             .init(allowedOrigin:
@@ -34,6 +32,12 @@ final class EloRankingCORS {
                     HTTPHeaderName.contentType,
                     HTTPHeaderName.origin,
                     HTTPHeaderName.xRequestedWith
-                ])
+                ],
+                  allowCredentials: true,
+                  cacheExpiration: 600)
+    }()
+
+    func middleware() -> CORSMiddleware {
+        return CORSMiddleware(configuration: eloRankingConfiguration)
     }
 }
