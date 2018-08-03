@@ -31,7 +31,7 @@ final class PlayerController {
         })
     }
 
-    static func get(_ request: Request) throws -> Future<Player.Public> {
+    static func find(_ request: Request) throws -> Future<Player.Public> {
         guard let playerId = request.query[String.self, at: "playerId"] else {
             throw Abort(.badRequest, reason: "Missing parameter playerId.")
         }

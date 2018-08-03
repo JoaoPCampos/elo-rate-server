@@ -64,11 +64,11 @@ final class GameController {
             })
     }
 
-    static func updateWinner(_ request: Request) throws -> Future<HTTPStatus> {
+    static func winner(_ request: Request) throws -> Future<HTTPStatus> {
         return try update(request, isWinner: true)
     }
 
-    static func updateLoser(_ request: Request) throws -> Future<HTTPStatus> {
+    static func loser(_ request: Request) throws -> Future<HTTPStatus> {
         return try update(request, isWinner: false)
     }
 }
