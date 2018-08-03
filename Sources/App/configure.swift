@@ -15,11 +15,11 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     try routes(router)
     services.register(router, as: Router.self)
     
-    /// Register middleware
-    var middlewares = MiddlewareConfig() // Create _empty_ middleware config
-    /// middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
-    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
-    services.register(middlewares)
+    /// Register middleware for CORS
+    let eloRankingCORS = EloRankingCORS()
+    var middlewareConfig = MiddlewareConfig()
+    middlewareConfig.use(eloRankingCORS.middleware())
+    services.register(middlewareConfig)
     
     // Configure a SQLite database
     let sqlite = try SQLiteDatabase(storage: .memory)
