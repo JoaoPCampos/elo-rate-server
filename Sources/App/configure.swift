@@ -14,14 +14,16 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     let router = EngineRouter.default()
     try routes(router)
     services.register(router, as: Router.self)
-    
-    /// Middleware for errors
+
     var middlewares = MiddlewareConfig() // Create _empty_ middleware config
-    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
 
     /// Middleware for CORS
-    let eloRankingCORS = EloRankingCORS()
-    middlewares.use(eloRankingCORS.middleware())
+    middlewares.use(EloRankingCORS().middleware())
+    services.register(middlewares)
+
+    /// Middleware for errors
+    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
+    services.register(middlewares)
 
     /// Register Middleware
     services.register(middlewares)
