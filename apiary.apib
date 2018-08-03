@@ -107,7 +107,6 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
 ## Game Services [/game]
 
 ### Create Game [POST /game?contenderId={contenderId}]
-####Creates a new Game versus the contender.
 
 + Parameters
     + contenderId (String) - Email of the player to challenge
@@ -138,7 +137,6 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
 
 
 ### Accept Game [POST /game/accept]
-####Only a contender may accept the game created by the challenger player. Status is at 0 when game is created, accepting game turns status to 1, winning or losing the game turns the status to 2.
 
 + Request (application/json)
 
@@ -151,7 +149,6 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
     
 
 ### List Games [GET /games]
-####Lists all games of logged in player
 
 + Request (application/json)
 
@@ -174,7 +171,6 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
 
 
 ### Win Game [POST /game/winner]
-####Only the challenger player who created the game may update the game as winner
 
 + Request (application/json)
 
@@ -187,7 +183,6 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
     
 
 ### Lose Game [POST /game/loser]
-####Only the challenger player who created the game may update the game as loser
 
 + Request (application/json)
 
