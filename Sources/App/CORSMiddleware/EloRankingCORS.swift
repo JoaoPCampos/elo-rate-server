@@ -34,7 +34,15 @@ final class EloRankingCORS {
                     .xRequestedWith
                 ],
                   allowCredentials: true,
-                  cacheExpiration: 600)
+                  cacheExpiration: 600,
+                  exposedHeaders:
+                [
+                    "Accept",
+                    "Authorization",
+                    "Content-Type",
+                    "Origin",
+                    "X-Requested-With"
+                ])
     }()
 
     func middleware() -> CORSMiddleware {
