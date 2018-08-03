@@ -10,6 +10,7 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
 ### Login Player [POST /login]
 
 + Request (application/json)
+
     + Headers
 
             Authorization: Basic YTph (basic auth uses username:password encode base 64)
@@ -25,25 +26,30 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
 ### Logout Player [DELETE /logout]
 
 + Request (application/json)
+
     + Headers
 
             Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
 
 + Response 204
 
+
 ## Player Services [/player]
 
 ### Create Player [POST /player]
 
 + Request (application/json)
+
     + Body
-        {
-            "username": "Username",
-            "email": "email@email.com",
-            "password": "password"
-        }
+
+            {
+                "username": "Username",
+                "email": "email@email.com",
+                "password": "password"
+            }
 
 + Response 201 (application/json)
+
     + Body
 
             {
@@ -54,108 +60,140 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
                 "wins": 0
             }
 
+
 ### List Players [GET /players]
 
 + Request (application/json)
     
-+ Response 201 (application/json)
     
++ Response 201 (application/json)
+    + Headers
+
 
     + Body
-        [{
-            "email": "email@email.com",
-            "username": "Username",
-            "losses": 0,
-            "elo": 1300,
-            "wins": 0
-        }]
+
+            [{
+                "email": "email@email.com",
+                "username": "Username",
+                "losses": 0,
+                "elo": 1300,
+                "wins": 0
+            }]
             
 ### Find Player [GET /player?playerId={playerId}]
 
 + Parameters
     + playerId (String) - Email of the player to search
 
+
 + Request (application/json)
-    + Headers
-    
+
+
 + Response 201 (application/json)
+    + Headers
+
+
     + Body
-        {
-            "email": "email@email.com",
-            "username": "Username",
-            "losses": 0,
-            "elo": 1300,
-            "wins": 0
-        }
+
+            {
+                "email": "email@email.com",
+                "username": "Username",
+                "losses": 0,
+                "elo": 1300,
+                "wins": 0
+            }
+
 
 ## Game Services [/game]
 
 ### Create Game [POST /game?contenderId={contenderId}]
-Creates a new Game versus the contender.
+####Creates a new Game versus the contender.
 
 + Parameters
     + contenderId (String) - Email of the player to challenge
 
 + Request (application/json)
+
     + Headers
-        Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+    
+            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+
 
     + Body
-        {
-            "name": "Game playerA vs playerB"
-        }
+    
+            {
+                "name": "Game playerA vs playerB"
+            }
 
 + Response 201 (application/json)
-    + Body
-        {
-            "contender": "email2@email2.com",
-            "status": 0,
-            "name": "Game playerA vs playerB",
-            "challenger": "email@email.com"
-        }
 
-### Accept Game [POST game/accept]
-Only a contender may accept the game created by the challenger player.
-Status is at 0 when game is created, accepting game turns status to 1,
-winning or losing the game turns the status to 2.
+    + Body
+    
+            {
+                "contender": "email2@email2.com",
+                "status": 0,
+                "name": "Game playerA vs playerB",
+                "challenger": "email@email.com"
+            }
+
+
+### Accept Game [POST /game/accept]
+####Only a contender may accept the game created by the challenger player. Status is at 0 when game is created, accepting game turns status to 1, winning or losing the game turns the status to 2.
 
 + Request (application/json)
-    + Headers
-        Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
 
-+ Response 204
+    + Headers
+    
+            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+        
+
++ Response 204 (application/json)
+    
 
 ### List Games [GET /games]
-Lists all games of logged in player
+####Lists all games of logged in player
 
 + Request (application/json)
+
     + Headers
-        Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+    
+            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+
 
 
 + Response 201 (application/json)
+
     + Body
-        [{
-            "contender": "email2@email2.com",
-            "status": 0,
-            "name": "Game playerA vs playerB",
-            "challenger": "email@email.com"
-        }]
+    
+            [{
+                "contender": "email2@email2.com",
+                "status": 0,
+                "name": "Game playerA vs playerB",
+                "challenger": "email@email.com"
+            }]
 
-### Win Game [POST game/winner]
-Only the challenger player who created the game may update the game as winner
 
-+ Request (application/json)
-    + Headers
-        Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
-
-+ Response 204
-
-### Lose Game [POST game/loser]
-Only the challenger player who created the game may update the game as loser
+### Win Game [POST /game/winner]
+####Only the challenger player who created the game may update the game as winner
 
 + Request (application/json)
-    + Headers
-        Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
 
-+ Response 204
+    + Headers
+    
+            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+
+
++ Response 204 (application/json)
+    
+
+### Lose Game [POST /game/loser]
+####Only the challenger player who created the game may update the game as loser
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+
+
++ Response 204 (application/json)
