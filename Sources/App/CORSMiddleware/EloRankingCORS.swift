@@ -11,11 +11,6 @@ import Vapor
 final class EloRankingCORS {
     
     lazy private var eloRankingConfiguration: CORSMiddleware.Configuration = {
-        let a = HTTPHeaderName(stringLiteral: "Accept")
-        let b = HTTPHeaderName(stringLiteral: "Authorization")
-        let c = HTTPHeaderName(stringLiteral: "Content-Type")
-        let d = HTTPHeaderName(stringLiteral: "Origin")
-        let e = HTTPHeaderName(stringLiteral: "X-Requested-With")
 
         return CORSMiddleware
             .Configuration
@@ -33,21 +28,21 @@ final class EloRankingCORS {
                 ],
                   allowedHeaders:
                 [
-                    a,
-                    b,
-                    c,
-                    d,
-                    e
+                    .accept,
+                    .authorization,
+                    .contentType,
+                    .origin,
+                    .xRequestedWith
                 ],
                   allowCredentials: true,
                   cacheExpiration: 600,
                   exposedHeaders:
                 [
-                    "Accept",
-                    "Authorization",
-                    "Content-Type",
-                    "Origin",
-                    "X-Requested-With"
+                    "accept",
+                    "authorization",
+                    "content-type",
+                    "origin",
+                    "x-requested-with"
                 ])
     }()
 
