@@ -37,11 +37,11 @@ final class EloRankingCORS {
                   cacheExpiration: 600,
                   exposedHeaders:
                 [
-                    "Accept",
-                    "Authorization",
-                    "Content-Type",
-                    "Origin",
-                    "X-Requested-With"
+                    "accept",
+                    "authorization",
+                    "content-type",
+                    "origin",
+                    "x-requested-with"
                 ])
     }()
 
