@@ -18,20 +18,20 @@ final class EloRankingCORS {
 
                   allowedMethods:
                 [
-                    HTTPMethod.GET,
-                    HTTPMethod.POST,
-                    HTTPMethod.PUT,
-                    HTTPMethod.DELETE,
-                    HTTPMethod.PATCH,
-                    HTTPMethod.OPTIONS
+                    .GET,
+                    .POST,
+                    .PUT,
+                    .DELETE,
+                    .PATCH,
+                    .OPTIONS
                 ],
                   allowedHeaders:
                 [
-                    HTTPHeaderName.accept,
-                    HTTPHeaderName.authorization,
-                    HTTPHeaderName.contentType,
-                    HTTPHeaderName.origin,
-                    HTTPHeaderName.xRequestedWith
+                    .accept,
+                    .authorization,
+                    .contentType,
+                    .origin,
+                    .xRequestedWith
                 ],
                   allowCredentials: true,
                   cacheExpiration: 600)
