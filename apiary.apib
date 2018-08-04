@@ -23,6 +23,15 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
             "email": "email@email.com"
         }
         
++ Response 401 (text/plain)
+
+            Error: "There is no such a message for you, dear guest."
+
+
++ Response 410 (text/plain)
+
+        The message you are searching for does not exist anymore.
+        
 ### Logout Player [DELETE /logout]
 
 + Request (application/json)
@@ -80,10 +89,10 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
                 "wins": 0
             }]
             
-### Find Player [GET /player?email={playerEmail}]
+### Find Player [GET /player{?email}]
 
 + Parameters
-    + playerEmail (String) - Email of the player to search
+    + email: playerEmail (string)
 
 
 + Request (application/json)
@@ -106,10 +115,10 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
 
 ## Game Services [/game]
 
-### Create Game [POST /game?email={contenderEmail}]
+### Create Game [POST /game{?email}]
 
 + Parameters
-    + contenderEmail (String) - Email of the player to challenge
+    + email: contenderEmail (String) - Email of the player to challenge
 
 + Request (application/json)
 
