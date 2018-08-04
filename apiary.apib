@@ -80,10 +80,10 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
                 "wins": 0
             }]
             
-### Find Player [GET /player?playerId={playerId}]
+### Find Player [GET /player?email={playerEmail}]
 
 + Parameters
-    + playerId (String) - Email of the player to search
+    + playerEmail (String) - Email of the player to search
 
 
 + Request (application/json)
@@ -106,10 +106,10 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
 
 ## Game Services [/game]
 
-### Create Game [POST /game?contenderId={contenderId}]
+### Create Game [POST /game?email={contenderEmail}]
 
 + Parameters
-    + contenderId (String) - Email of the player to challenge
+    + contenderEmail (String) - Email of the player to challenge
 
 + Request (application/json)
 
