@@ -10,28 +10,28 @@ import Crypto
 import HTTP
 
 final class APIMiddleware {
-
+    
     private enum AuthType {
         case basic
         case token
     }
-
+    
     private let authType: AuthType
-
+    
     private init(authType: AuthType) {
         self.authType = authType
     }
-
+    
     static let playerBasicAuth: [Middleware] = [
         APIMiddleware(authType: .basic),
         Player.basicAuthMiddleware(using: BCryptDigest()),
         Player.guardAuthMiddleware()]
-
+    
     static let playerTokenAuth: [Middleware] = [
         APIMiddleware(authType: .token),
         Player.tokenAuthMiddleware(),
         Player.guardAuthMiddleware()]
-
+    
     static let adminBasicAuth: [Middleware] = [
         APIMiddleware(authType: .basic),
         AdminPlayer.basicAuthMiddleware(using: BCryptDigest()),
@@ -39,17 +39,42 @@ final class APIMiddleware {
 }
 
 extension APIMiddleware: Middleware {
+    
     func respond(to request: Request, chainingTo next: Responder) throws -> EventLoopFuture<Response> {
         
         switch authType {
+            
         case .basic:
-
-            break
-
+            guard let basicAuth = request.http.headers.basicAuthorization else {
+                throw Abort(.notFound, reason: "Authorization header missing")
+            }
+            return Player
+                .query(on: request)
+                .all()
+                .flatMap { (players) -> EventLoopFuture<Response> in
+                    
+                    guard !players.isEmpty else { throw Abort(.notFound, reason: "There are no players registered")}
+                    
+                    guard !players.filter({ $0.username == basicAuth.username }).isEmpty else {
+                        throw Abort(.expectationFailed, reason: "Wrong username or password")
+                    }
+                    return try next.respond(to: request)
+            }
+            
         case .token:
-
-            break
+            guard let bearerHeader = request.http.headers.bearerAuthorization else {
+                throw Abort(.notFound, reason: "Authorization header missing")
+            }
+            
+            return Token
+                .query(on: request)
+                .all()
+                .flatMap({ tokens -> EventLoopFuture<Response> in
+                    guard !tokens.filter({ $0.token == bearerHeader.token }).isEmpty else {
+                        throw Abort(.unauthorized, reason: "Token is invalid, please login to request a new one.")
+                    }
+                    return try next.respond(to: request)
+                })
         }
-        return try next.respond(to: request)
     }
 }

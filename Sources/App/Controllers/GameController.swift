@@ -12,15 +12,15 @@ final class GameController {
 
     static func create(_ request: Request) throws -> Future<Game.Public> {
 
-        guard let contenderId = request.query[String.self, at: "contenderId"] else {
-            throw Abort(.badRequest, reason: "Missing contender id")
+        guard let contenderEmail = request.query[String.self, at: "email"] else {
+            throw Abort(.badRequest, reason: "Missing contender email")
         }
 
         return try request
             .content
             .decode(Game.Create.self)
             .map({ game -> Future<Game> in
-                return try create(game: game, versus: contenderId, request)
+                return try create(game: game, versus: contenderEmail, request)
             }).flatMap({ (newGame) -> EventLoopFuture<Game.Public> in
                 return newGame.convertToPublic()
             })
@@ -28,19 +28,19 @@ final class GameController {
 
     static func accept(_ request: Request) throws -> Future<Game.Public> {
         let player = try request.requireAuthenticated(Player.self)
-        guard let email = player.email else { throw Abort(.unauthorized, reason: "unauthorized Player") }
+        guard let email = player.email else { throw Abort(.unauthorized, reason: "Unauthorized Player") }
 
         return Game
             .query(on: request)
             .all()
             .map({ games -> Game in
-                guard let game = games.filter({ $0.contenderId == email }).first else {
+                guard let game = games.filter({ $0.contenderEmail == email }).first else {
                     throw Abort(.unauthorized, reason: "\(player.username) is not able to accept challenge")
                 }
 
                 let acceptedGame = Game(name: game.name,
-                                        challengerId: game.challengerId,
-                                        contenderId: game.contenderId,
+                                        challengerEmail: game.challengerEmail,
+                                        contenderEmail: game.contenderEmail,
                                         challenger: game.challenger,
                                         contender: game.contender,
                                         status: GameStatus.accepted.rawValue)
@@ -52,14 +52,14 @@ final class GameController {
 
     static func list(_ request: Request) throws -> Future<[Game.Public]> {
         let player = try request.requireAuthenticated(Player.self)
-        guard let email = player.email else { throw Abort(.unauthorized, reason: "unauthorized Player") }
+        guard let email = player.email else { throw Abort(.unauthorized, reason: "Unauthorized Player") }
 
         return Game
             .query(on: request)
             .all()
             .map({ games -> [Game.Public] in
                 return games
-                    .filter({ $0.challengerId == email || $0.contenderId == email})
+                    .filter({ $0.challengerEmail == email || $0.contenderEmail == email})
                     .map({ return $0.convertToPublic() })
             })
     }
@@ -75,20 +75,20 @@ final class GameController {
 
 extension GameController {
 
-    private static func create(game: Game.Create, versus contenderId: String, _ request: Request) throws -> Future<Game> {
+    private static func create(game: Game.Create, versus contenderEmail: String, _ request: Request) throws -> Future<Game> {
         let player = try request.requireAuthenticated(Player.self)
-        guard let email = player.email else { throw Abort(.unauthorized, reason: "unauthorized Player") }
+        guard let email = player.email else { throw Abort(.unauthorized, reason: "Unauthorized Player") }
 
-        guard player.email != contenderId else {
+        guard player.email != contenderEmail else {
             throw Abort(.conflict, reason: "Challenger \(player.username) must be different from contender.")
         }
 
         return try PlayerController
-            .getPlayer(byId: contenderId, request)
+            .getPlayer(request, byEmail: contenderEmail)
             .map({ contender -> Game in
                 return Game(name: game.name,
-                            challengerId: email,
-                            contenderId: contenderId,
+                            challengerEmail: email,
+                            contenderEmail: contenderEmail,
                             challenger: player.username,
                             contender: contender.username)
             }).create(on: request)
@@ -97,19 +97,19 @@ extension GameController {
     private static func update(_ request: Request, isWinner: Bool) throws -> Future<HTTPStatus> {
         let player = try request.requireAuthenticated(Player.self)
 
-        guard let email = player.email else { throw Abort(.unauthorized, reason: "unauthorized Player") }
+        guard let email = player.email else { throw Abort(.unauthorized, reason: "Unauthorized Player") }
 
         return Game
             .query(on: request)
             .all()
             .map({ games -> Game in
-                guard let game = games.filter({ $0.challengerId == email }).first else {
+                guard let game = games.filter({ $0.challengerEmail == email }).first else {
                     throw Abort(.unauthorized, reason: "\(player.username) is not able to update challenge")
                 }
 
                 let updatedGame = Game(name: game.name,
-                                       challengerId: game.challengerId,
-                                       contenderId: game.contenderId,
+                                       challengerEmail: game.challengerEmail,
+                                       contenderEmail: game.contenderEmail,
                                        challenger: game.challenger,
                                        contender: game.contender,
                                        status: GameStatus.completed.rawValue)
@@ -126,7 +126,7 @@ extension GameController {
         let player = try request.requireAuthenticated(Player.self)
 
         return try PlayerController
-            .getPlayer(byId: game.contenderId, request)
+            .getPlayer(request, byEmail: game.contenderEmail)
             .flatMap({ (contender) -> EventLoopFuture<Player> in
                 let contenderRating = Rating(currentElo: CGFloat(contender.elo), winner: !isWinner)
 

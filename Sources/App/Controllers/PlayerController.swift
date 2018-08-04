@@ -32,20 +32,20 @@ final class PlayerController {
     }
 
     static func find(_ request: Request) throws -> Future<Player.Public> {
-        guard let playerId = request.query[String.self, at: "playerId"] else {
-            throw Abort(.badRequest, reason: "Missing parameter playerId.")
+        guard let email = request.query[String.self, at: "email"] else {
+            throw Abort(.badRequest, reason: "Missing parameter email.")
         }
 
-        return try getPlayer(byId: playerId, request).convertToPublic()
+        return try getPlayer(request, byEmail: email).convertToPublic()
 
     }
 }
 
 extension PlayerController {
 
-    static func getPlayer(byId playerId: String, _ request: Request) throws -> Future<Player> {
+    static func getPlayer( _ request: Request, byEmail email: String) throws -> Future<Player> {
         return Player
-            .find(playerId, on: request)
+            .find(email, on: request)
             .map({ player -> Player in
                 guard let player = player else {
                     throw Abort(.notFound, reason: "Player not found.")
