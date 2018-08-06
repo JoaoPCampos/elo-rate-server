@@ -22,7 +22,7 @@ extension EloRankingURL {
                 return baseURL + "players"
 
             case .update:
-                return baseURL + self.rawValue
+                return baseURL + "player/" + self.rawValue
             }
         }
     }
