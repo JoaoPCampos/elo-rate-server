@@ -38,16 +38,17 @@ final class GameController {
                     throw Abort(.unauthorized, reason: "\(player.username) is not able to accept challenge")
                 }
 
-                let acceptedGame = Game(name: game.name,
+                
+                let acceptedGame = Game(id: game.id,
+                                        name: game.name,
                                         challengerEmail: game.challengerEmail,
                                         contenderEmail: game.contenderEmail,
                                         challenger: game.challenger,
                                         contender: game.contender,
                                         status: GameStatus.accepted.rawValue)
-
                 return acceptedGame
             })
-            .save(on: request).convertToPublic()
+            .update(on: request).convertToPublic()
     }
 
     static func list(_ request: Request) throws -> Future<[Game.Public]> {
@@ -107,7 +108,8 @@ extension GameController {
                     throw Abort(.unauthorized, reason: "\(player.username) is not able to update challenge")
                 }
 
-                let updatedGame = Game(name: game.name,
+                let updatedGame = Game(id: game.id,
+                                       name: game.name,
                                        challengerEmail: game.challengerEmail,
                                        contenderEmail: game.contenderEmail,
                                        challenger: game.challenger,
@@ -116,7 +118,7 @@ extension GameController {
 
                 return updatedGame
             })
-            .save(on: request)
+            .update(on: request)
             .flatMap({ game -> EventLoopFuture<HTTPStatus> in
                 return try updateElo(request, game: game, isWinner: isWinner)
             })
@@ -136,7 +138,7 @@ extension GameController {
                                               elo: contenderRating.calculate(versusElo: player.elo),
                                               wins: contender.wins,
                                               losses: contender.losses)
-                return updatedContender.save(on: request)
+                return updatedContender.update(on: request)
                     .flatMap({ newContender -> EventLoopFuture<Player> in
 
                         let meRating = Rating(currentElo: CGFloat(player.elo), winner: isWinner)
@@ -147,7 +149,7 @@ extension GameController {
                                                elo: meRating.calculate(versusElo: contender.elo),
                                                wins: player.wins,
                                                losses: player.losses)
-                        return updatedMe.save(on: request)
+                        return updatedMe.update(on: request)
                     })
             }).transform(to: .ok)
     }

@@ -25,7 +25,8 @@ final class Game: Codable {
     let contender: String
     let status: Int
     
-    init(name: String, challengerEmail: String, contenderEmail: String, challenger: String, contender: String, status: Int = GameStatus.pending.rawValue) {
+    init(id: Int? = nil, name: String, challengerEmail: String, contenderEmail: String, challenger: String, contender: String, status: Int = GameStatus.pending.rawValue) {
+        self.id = id
         self.name = name
         self.challengerEmail = challengerEmail
         self.contenderEmail = contenderEmail

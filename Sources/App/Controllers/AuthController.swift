@@ -19,7 +19,7 @@ final class AuthController {
         return Token
             .find(email, on: request)
             .flatMap({ (token) -> EventLoopFuture<Token> in
-                return (token != nil) ? newToken.save(on: request) : newToken.create(on: request)
+                return (token != nil) ? newToken.update(on: request) : newToken.create(on: request)
             }).convertToPublic()
     }
     
