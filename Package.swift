@@ -12,7 +12,11 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-sqlite.git", from: "3.0.0"),
 
         // 🔐 Authentication package
-        .package(url: "https://github.com/vapor/auth.git", from: "2.0.0-rc")
+        .package(url: "https://github.com/vapor/auth.git", from: "2.0.0-rc"),
+
+        /// 📤 Mail service
+        .package(url: "https://github.com/IBM-Swift/Swift-SMTP", .upToNextMinor(from: "5.1.0"))
+
     ],
     
     targets: [
@@ -20,7 +24,8 @@ let package = Package(
                 dependencies: [
                     "Vapor",
                     "FluentSQLite",
-                    "Authentication"]),
+                    "Authentication",
+                    "SwiftSMTP"]),
 
         .target(name: "Run",
                 dependencies: ["App"]),

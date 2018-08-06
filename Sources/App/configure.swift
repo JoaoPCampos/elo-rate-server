@@ -28,10 +28,6 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     /// Register Middleware
     services.register(middlewares)
 
-    /// Mailgun
-    let mailgun = Mailgun(apiKey: "c459f8b151b59b0946cee0dfb899be12-a5d1a068-38f46fe4", domain: "elo-ranking-development.vapor.cloud")
-    services.register(mailgun, as: Mailgun.self)
-
     // Configure a SQLite database
     let sqlite = try SQLiteDatabase(storage: .memory)
     

@@ -48,10 +48,10 @@ final class AuthController {
 
         return Player
             .find(email, on: request)
-            .flatMap({ player -> Future<Void> in
-                guard let player = player else { return request.next().future() }
+            .flatMap({ player -> EventLoopFuture<HTTPStatus> in
+                guard let player = player else { return request.next().future().transform(to: .ok) }
                 return try EmailController.send(request, toPlayer: player)
-            }).transform(to: .ok)
+            })
     }
 
 
