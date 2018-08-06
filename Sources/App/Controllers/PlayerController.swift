@@ -37,7 +37,24 @@ final class PlayerController {
         }
 
         return try getPlayer(request, byEmail: email).convertToPublic()
+    }
 
+    static func update(_ request: Request) throws -> Future<Player.Public> {
+        let oldPlayer = try request.requireAuthenticated(Player.self)
+        return try request
+            .content
+            .decode(Player.Create.self)
+            .map({ player -> Player in
+
+                let encriptedPassword = try BCrypt.hash(player.password)
+
+                return Player(username: player.username,
+                    email: oldPlayer.email,
+                    password: encriptedPassword,
+                    elo: oldPlayer.elo,
+                    wins: oldPlayer.wins,
+                    losses: oldPlayer.losses)
+            }).update(on: request).convertToPublic()
     }
 }
 

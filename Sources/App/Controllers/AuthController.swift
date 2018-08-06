@@ -33,11 +33,26 @@ final class AuthController {
             .all()
             .map ({ (tokens) -> Token in
                 guard let token = tokens.filter( { token in token.email == email } ).first else {
-                    throw Abort(.notFound, reason: "Token for player email \(email) not found.")
+                    throw Abort(.notFound, reason: "Token for player with email \(email) not found.")
                 }
                 return token
                 
             }).delete(on: request)
             .transform(to: .ok)
     }
+
+    static func recover(_ request: Request) throws -> Future<HTTPStatus> {
+        guard let email = request.query[String.self, at: "email"] else {
+            throw Abort(.badRequest, reason: "Missing email parameter.")
+        }
+
+        return Player
+            .find(email, on: request)
+            .flatMap({ player -> Future<Void> in
+                guard let player = player else { return request.next().future() }
+                return try EmailController.send(request, toPlayer: player)
+            }).transform(to: .ok)
+    }
+
+
 }

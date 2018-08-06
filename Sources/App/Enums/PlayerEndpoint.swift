@@ -10,6 +10,7 @@ extension EloRankingURL {
         case create
         case list
         case find
+        case update
 
         var path: String {
             switch self {
@@ -19,6 +20,9 @@ extension EloRankingURL {
                 
             case .list:
                 return baseURL + "players"
+
+            case .update:
+                return baseURL + self.rawValue
             }
         }
     }

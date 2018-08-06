@@ -18,6 +18,9 @@ private func authRoutes(_ router: Router) {
     router
         .grouped(APIMiddleware.playerTokenAuth)
         .delete(EloRankingURL.Auth.logout.path, use: AuthController.logout)
+
+    router
+        .post(EloRankingURL.Auth.recover.path, use: AuthController.recover)
 }
 
 private func playerRoutes(_ router: Router) {
@@ -29,6 +32,10 @@ private func playerRoutes(_ router: Router) {
 
     router
         .get(EloRankingURL.Player.find.path, use: PlayerController.find)
+
+    router
+        .grouped(APIMiddleware.playerTokenAuth)
+        .put(EloRankingURL.Player.update.path, use: PlayerController.update)
 }
 
 private func gameRoutes(_ router: Router) {
@@ -38,7 +45,7 @@ private func gameRoutes(_ router: Router) {
 
     router
         .grouped(APIMiddleware.playerTokenAuth)
-        .post(EloRankingURL.Game.accept.path, use: GameController.accept)
+        .put(EloRankingURL.Game.accept.path, use: GameController.accept)
 
     router
         .grouped(APIMiddleware.playerTokenAuth)

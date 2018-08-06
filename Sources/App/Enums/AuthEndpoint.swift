@@ -9,6 +9,7 @@ extension EloRankingURL {
     enum Auth: String {
         case login
         case logout
+        case recover
 
         var path: String {
             return baseURL + "auth/" + self.rawValue
