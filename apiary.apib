@@ -3,7 +3,11 @@ HOST: https://elo-ranking-development.vapor.cloud/
 
 # EloRanking
 
-Elo ranking is a simple API allowing consumers to create players, games and update rankings.
+Elo ranking is a simple API allowing consumers to create and register games
+against other oponnents, updating their elo according to the outcome of the game.
+
+Start by creating a player, login in using the username and password, and save
+ewthe token given for further API requests that require authentication.
 
 ## Auth Services [/auth]
 
@@ -23,14 +27,6 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
             "email": "email@email.com"
         }
         
-+ Response 401 (text/plain)
-
-            Error: "There is no such a message for you, dear guest."
-
-
-+ Response 410 (text/plain)
-
-        The message you are searching for does not exist anymore.
         
 ### Logout Player [DELETE /logout]
 
@@ -40,7 +36,23 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
 
             Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
 
+
 + Response 204
+
+
+### Recover Password [POST /recover{?email}]
+
++ Parameters
+
+    + email: playerEmail (String) - Email of the player to send a new password
+    
+    
++ Request (application/json)
+
+    + Headers
+    
+
++ Response 204 (application/json)
 
 
 ## Player Services [/player]
@@ -56,6 +68,7 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
                 "email": "email@email.com",
                 "password": "password"
             }
+            
 
 + Response 201 (application/json)
 
@@ -75,7 +88,8 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
 + Request (application/json)
     
     
-+ Response 201 (application/json)
++ Response 200 (application/json)
+
     + Headers
 
 
@@ -92,13 +106,15 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
 ### Find Player [GET /player{?email}]
 
 + Parameters
-    + email: playerEmail (string)
+
+    + email: playerEmail (string) - Email of the player to find
 
 
 + Request (application/json)
 
 
-+ Response 201 (application/json)
++ Response 200 (application/json)
+
     + Headers
 
 
@@ -113,12 +129,48 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
             }
 
 
+### Update Player [PUT /player/update{?email}]
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+            
+            
+    + Body
+
+            {
+                "username": "New username",
+                "email": "email@email.com",
+                "password": "new password"
+            }
+
+
++ Response 200 (application/json)
+
+    + Headers
+
+
+    + Body
+
+            {
+                "email": "email@email.com",
+                "username": "New username",
+                "losses": 0,
+                "elo": 1300,
+                "wins": 0
+            }
+
+
 ## Game Services [/game]
 
 ### Create Game [POST /game{?email}]
 
 + Parameters
+
     + email: contenderEmail (String) - Email of the player to challenge
+    
 
 + Request (application/json)
 
@@ -132,6 +184,7 @@ Elo ranking is a simple API allowing consumers to create players, games and upda
             {
                 "name": "Game playerA vs playerB"
             }
+
 
 + Response 201 (application/json)
 
