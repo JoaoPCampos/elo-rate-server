@@ -15,7 +15,7 @@ final class PlayerController {
 
         return try request
             .content
-            .decode(Player.Create.self)
+            .decode(Player.self)
             .map({ player -> Player in
 
                 let encriptedPassword = try BCrypt.hash(player.password)
@@ -38,39 +38,50 @@ final class PlayerController {
             throw Abort(.badRequest, reason: "Missing parameter id.")
         }
 
-        return try getPlayer(request, byId: playerId).convertToPublic()
+        return try findPlayer(request, byId: playerId).convertToPublic()
     }
 
     static func update(_ request: Request) throws -> Future<Player.Public> {
         let oldPlayer = try request.requireAuthenticated(Player.self)
         return try request
             .content
-            .decode(Player.Create.self)
+            .decode(Player.self)
             .map({ player -> Player in
 
                 let encriptedPassword = try BCrypt.hash(player.password)
 
-                return Player(username: player.username,
-                    email: oldPlayer.email,
-                    password: encriptedPassword,
-                    elo: oldPlayer.elo,
-                    wins: oldPlayer.wins,
-                    losses: oldPlayer.losses)
+                /// Updates only username and or password
+                return Player(id: oldPlayer.id,
+                              username: oldPlayer.username,
+                              email: player.email, //new email
+                              password: encriptedPassword) //new password
             }).update(on: request).convertToPublic()
     }
 }
 
 extension PlayerController {
 
-    static func getPlayer( _ request: Request, byId playerId: UUID) throws -> Future<Player> {
+    static func findPlayer( _ request: Request, byId playerId: UUID) throws -> Future<Player> {
         return Player
             .find(playerId, on: request)
             .map({ player -> Player in
                 guard let player = player else {
                     throw Abort(.notFound, reason: "Player not found.")
                 }
-
                 return player
             })
+    }
+
+    static func findPlayer( _ request: Request, byEmail email: String) throws -> Future<Player> {
+        return Player
+            .query(on: request)
+            .all()
+            .map({ players -> Player in
+                guard let player = players.filter({ $0.email == email }).first else {
+                    throw Abort(.notFound, reason: "Player with email \(email) not found.")
+                }
+
+                return player
+        })
     }
 }

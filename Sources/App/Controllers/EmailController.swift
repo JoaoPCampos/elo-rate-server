@@ -14,12 +14,10 @@ final class EmailController {
         let newPassword = try CryptoRandom().generateData(count: 16).base64EncodedString()
 
         let hashedPassword = try BCrypt.hash(newPassword)
-        let updatePlayer = Player(username: player.username,
+        let updatePlayer = Player(id: player.id,
+                                  username: player.username,
                                   email: player.email,
-                                  password: hashedPassword,
-                                  elo: player.elo,
-                                  wins: player.wins,
-                                  losses: player.losses)
+                                  password: hashedPassword)
 
         return try EloRankingMail.send(request,
                                        to: player.email,

@@ -31,11 +31,6 @@ final class APIMiddleware {
         APIMiddleware(authType: .token),
         Player.tokenAuthMiddleware(),
         Player.guardAuthMiddleware()]
-    
-    static let adminBasicAuth: [Middleware] = [
-        APIMiddleware(authType: .basic),
-        AdminPlayer.basicAuthMiddleware(using: BCryptDigest()),
-        AdminPlayer.guardAuthMiddleware()]
 }
 
 extension APIMiddleware: Middleware {

@@ -41,18 +41,15 @@ final class AuthController {
             .transform(to: .ok)
     }
 
-//    static func recover(_ request: Request) throws -> Future<HTTPStatus> {
-//        guard let email = request.query[String.self, at: "email"] else {
-//            throw Abort(.badRequest, reason: "Missing email parameter.")
-//        }
-//
-//        return Player
-//            .find(email, on: request)
-//            .flatMap({ player -> EventLoopFuture<HTTPStatus> in
-//                guard let player = player else { return request.next().future().transform(to: .ok) }
-//                return try EmailController.send(request, toPlayer: player)
-//            })
-//    }
+    static func recover(_ request: Request) throws -> Future<HTTPStatus> {
+        guard let email = request.query[String.self, at: "email"] else {
+            throw Abort(.badRequest, reason: "Missing email parameter.")
+        }
 
-
+        return try PlayerController
+            .findPlayer(request, byEmail: email)
+            .flatMap({ player -> EventLoopFuture<HTTPStatus> in
+                return try EmailController.send(request, toPlayer: player)
+            })
+    }
 }

@@ -39,8 +39,7 @@ extension Token {
     }
 }
 
-extension Token: PostgreSQLUUIDModel {
-}
+extension Token: PostgreSQLUUIDModel {}
 
 extension Token: Authentication.Token {
     typealias UserType = Player
