@@ -10,7 +10,6 @@ import Crypto
 
 final class EmailController {
     static func send(_ request: Request, toPlayer player: Player) throws -> Future<HTTPStatus> {
-        guard let email = player.email else { return request.next().future().transform(to: .notFound) }
 
         let newPassword = try CryptoRandom().generateData(count: 16).base64EncodedString()
 
@@ -23,7 +22,7 @@ final class EmailController {
                                   losses: player.losses)
 
         return try EloRankingMail.send(request,
-                                       to: email,
+                                       to: player.email,
                                        subject: "Recover Password",
                                        username: player.username,
                                        password: newPassword)

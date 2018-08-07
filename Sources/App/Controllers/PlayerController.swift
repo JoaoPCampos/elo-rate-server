@@ -7,10 +7,12 @@
 
 import Vapor
 import Crypto
+import Foundation
 
 final class PlayerController {
 
     static func create(_ request: Request) throws -> Future<Player.Public> {
+
         return try request
             .content
             .decode(Player.Create.self)
@@ -32,11 +34,11 @@ final class PlayerController {
     }
 
     static func find(_ request: Request) throws -> Future<Player.Public> {
-        guard let email = request.query[String.self, at: "email"] else {
-            throw Abort(.badRequest, reason: "Missing parameter email.")
+        guard let playerId = request.query[UUID.self, at: "id"] else {
+            throw Abort(.badRequest, reason: "Missing parameter id.")
         }
 
-        return try getPlayer(request, byEmail: email).convertToPublic()
+        return try getPlayer(request, byId: playerId).convertToPublic()
     }
 
     static func update(_ request: Request) throws -> Future<Player.Public> {
@@ -60,9 +62,9 @@ final class PlayerController {
 
 extension PlayerController {
 
-    static func getPlayer( _ request: Request, byEmail email: String) throws -> Future<Player> {
+    static func getPlayer( _ request: Request, byId playerId: UUID) throws -> Future<Player> {
         return Player
-            .find(email, on: request)
+            .find(playerId, on: request)
             .map({ player -> Player in
                 guard let player = player else {
                     throw Abort(.notFound, reason: "Player not found.")

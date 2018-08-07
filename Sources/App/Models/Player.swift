@@ -7,11 +7,12 @@
 
 import Vapor
 import Foundation
-import FluentSQLite
+import FluentPostgreSQL
 import Authentication
 
 final class Player: Codable {
-    var email: String?
+    var id: UUID?
+    var email: String
     var username: String
     var password: String
 
@@ -19,7 +20,7 @@ final class Player: Codable {
     let wins: Int
     let losses: Int
 
-    init(username: String, email: String?, password: String, elo: Int = 1300, wins: Int = 0, losses: Int = 0) {
+    init(username: String, email: String, password: String, elo: Int = 1300, wins: Int = 0, losses: Int = 0) {
         self.username = username
         self.email = email
         self.password = password
@@ -42,13 +43,13 @@ final class Player: Codable {
 
     final class Public: Codable {
         var username: String
-        var email: String?
+        var email: String
 
         let elo: Int
         let wins: Int
         let losses: Int
 
-        init(username: String, email: String?, elo: Int, wins: Int, losses: Int) {
+        init(username: String, email: String, elo: Int, wins: Int, losses: Int) {
             self.username = username
             self.email = email
             self.elo = elo
@@ -73,11 +74,7 @@ extension Future where T: Player {
     }
 }
 
-extension Player: Model {
-    typealias Database = SQLiteDatabase
-    typealias ID = String
-    public static var idKey: IDKey = \Player.email
-}
+extension Player: PostgreSQLUUIDModel {}
 
 extension Player: PropertyDescribable {
     typealias Object = Player
@@ -94,4 +91,12 @@ extension Player: TokenAuthenticatable {
 
 extension Player: Content {}
 extension Player: Parameter {}
-extension Player: Migration {}
+extension Player: Migration {
+    static func prepare(on connection: PostgreSQLConnection)
+        -> Future<Void> {
+            // 1
+            return Database.create(self, on: connection) { builder in
+                builder.unique(on: \Player.email)
+                try addProperties(to: builder)
+            } }
+}

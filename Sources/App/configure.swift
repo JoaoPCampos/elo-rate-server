@@ -1,11 +1,11 @@
-import FluentSQLite
+import FluentPostgreSQL
 import Authentication
 import Vapor
 
 /// Called before your application initializes.
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
     /// Register providers first
-    try services.register(FluentSQLiteProvider())
+    try services.register(FluentPostgreSQLProvider())
     
     /// Register authentication
     try services.register(AuthenticationProvider())
@@ -28,21 +28,23 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     /// Register Middleware
     services.register(middlewares)
 
-    // Configure a SQLite database
-    let sqlite = try SQLiteDatabase(storage: .memory)
-    
-    /// Register the configured SQLite database to the database config.
+    // Configure a PostgreSQL database
     var databases = DatabasesConfig()
-    databases.add(database: sqlite, as: .sqlite)
+    let databaseConfig = PostgreSQLDatabaseConfig(
+        hostname: "localhost",
+        username: "vapor",
+        database: "vapor",
+        password: "password")
+    let database = PostgreSQLDatabase(config: databaseConfig)
+    databases.add(database: database, as: .psql)
     services.register(databases)
     
     /// Configure migrations
     var migrations = MigrationConfig()
-    migrations.add(model: Player.self, database: .sqlite)
-    migrations.add(model: AdminPlayer.self, database: .sqlite)
-    migrations.add(model: Token.self, database: .sqlite)
-    migrations.add(model: Game.self, database: .sqlite)
-    migrations.add(migration: Admin.self, database: .sqlite) //creates an admin at server start
+    migrations.add(model: Player.self, database: .psql)
+    migrations.add(model: AdminPlayer.self, database: .psql)
+    migrations.add(model: Token.self, database: .psql)
+    migrations.add(model: Game.self, database: .psql)
+    migrations.add(migration: Admin.self, database: .psql) //creates an admin at server start
     services.register(migrations)
-    
 }

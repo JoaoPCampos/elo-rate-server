@@ -8,15 +8,17 @@
 import Vapor
 import Crypto
 import Foundation
-import FluentSQLite
 import Authentication
+import FluentPostgreSQL
 
 final class AdminPlayer: Codable {
-    var email: String?
+    var id: String?
+    var email: String
     var username: String
     var password: String
     
-    init(username: String, email: String?, password: String) {
+    init(username: String, email: String, password: String) {
+        self.id = email
         self.username = username
         self.email = email
         self.password = password
@@ -26,7 +28,7 @@ final class AdminPlayer: Codable {
         var username: String
         var email: String?
         
-        init(username: String, email: String?) {
+        init(username: String, email: String) {
             self.username = username
             self.email = email
         }
@@ -48,10 +50,10 @@ extension Future where T: AdminPlayer {
     }
 }
 
-extension AdminPlayer: Model {
-    typealias Database = SQLiteDatabase
+extension AdminPlayer: PostgreSQLStringModel {
+    typealias Database = PostgreSQLDatabase
     typealias ID = String
-    public static var idKey: IDKey = \AdminPlayer.email
+    public static var idKey: IDKey = \AdminPlayer.id
 }
 
 extension AdminPlayer: BasicAuthenticatable {
@@ -65,9 +67,9 @@ extension AdminPlayer: Migration {}
 
 //To create an admin player at server start
 struct Admin: Migration {
-    typealias Database = SQLiteDatabase
+    typealias Database = PostgreSQLDatabase
     
-    static func prepare(on connection: SQLiteConnection) -> Future<Void> {
+    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
         let password = try? BCrypt.hash("123j0cs")
         guard let hashedPassword = password else {
             fatalError("Failed to create admin user")
@@ -79,7 +81,7 @@ struct Admin: Migration {
         return adminPlayer.create(on: connection).transform(to: ())
     }
     
-    static func revert(on connection: SQLiteConnection) -> Future<Void> {
+    static func revert(on connection: PostgreSQLConnection) -> Future<Void> {
         return .done(on: connection)
     }
 }

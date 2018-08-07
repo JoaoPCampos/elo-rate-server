@@ -7,7 +7,7 @@
 
 import Vapor
 import Foundation
-import FluentSQLite
+import FluentPostgreSQL
 
 enum GameStatus: Int {
     case pending = 0
@@ -58,8 +58,8 @@ final class Game: Codable {
     }
 }
 
-extension Game: Model {
-    typealias Database = SQLiteDatabase
+extension Game: PostgreSQLModel {
+    typealias Database = PostgreSQLDatabase
     typealias ID = Int
     public static var idKey: IDKey = \Game.id
 }

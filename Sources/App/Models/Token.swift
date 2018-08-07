@@ -7,27 +7,24 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentPostgreSQL
 import Authentication
 
 final class Token: Codable {
-    var id: String?
+    var id: UUID?
     var token: String
-    var email: Player.ID
+    var playerId: Player.ID
     
-    init(token: String, email: Player.ID) {
+    init(token: String, playerId: Player.ID) {
         self.token = token
-        self.email = email
-        self.id = email
+        self.playerId = playerId
     }
 
     final class Public: Codable {
         var token: String
-        var email: Player.ID
 
-        init(token: String, email: Player.ID) {
+        init(token: String) {
             self.token = token
-            self.email = email
         }
     }
 }
@@ -38,20 +35,16 @@ extension Token {
         
         return try Token(
             token: random.base64EncodedString(),
-            email: user.requireID())
+            playerId: user.requireID())
     }
 }
 
-extension Token: Model {
-    typealias Database = SQLiteDatabase
-    typealias ID = String
-    
-    public static var idKey: IDKey = \Token.id
+extension Token: PostgreSQLUUIDModel {
 }
 
 extension Token: Authentication.Token {
     typealias UserType = Player
-    static let userIDKey: UserIDKey = \Token.email
+    static let userIDKey: UserIDKey = \Token.playerId
 }
 
 extension Token: BearerAuthenticatable {
@@ -64,7 +57,7 @@ extension Token.Public: Content {}
 
 extension Token {
     func convertToPublic() -> Token.Public {
-        return Token.Public(token: token, email: email)
+        return Token.Public(token: token)
     }
 }
 
