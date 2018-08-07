@@ -13,7 +13,7 @@ ewthe token given for further API requests that require authentication.
 
 ## Auth Services [/auth]
 
-### Login Player [POST /login]
+### Login Player [POST /auth/login]
 
 + Request (application/json)
 
@@ -30,7 +30,7 @@ ewthe token given for further API requests that require authentication.
         }
         
         
-### Logout Player [DELETE /logout]
+### Logout Player [DELETE /auth/logout]
 
 + Request (application/json)
 
@@ -42,7 +42,7 @@ ewthe token given for further API requests that require authentication.
 + Response 204
 
 
-### Recover Password [POST /recover{?email}]
+### Recover Password [POST /authix /recover{?email}]
 
 + Parameters
 
