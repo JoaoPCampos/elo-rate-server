@@ -16,7 +16,7 @@ extension EloRankingURL {
             switch self {
             case .create,
                  .find:
-                return baseURL + "player"
+                return baseURL + "player/"
                 
             case .list:
                 return baseURL + "players"

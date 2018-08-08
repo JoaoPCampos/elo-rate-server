@@ -16,6 +16,14 @@ final class Player: Codable {
     var username: String
     var password: String
 
+    var games: Siblings<Player, Game, PlayerGamePivot> {
+        return siblings()
+    }
+
+    var playerStats: Children<Player, PlayerStats> {
+        return children(\PlayerStats.playerId)
+    }
+
     init(id: UUID? = nil, username: String, email: String, password: String) {
         self.username = username
         self.email = email

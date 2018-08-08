@@ -32,4 +32,10 @@ final class PlayerStats: Codable {
 extension PlayerStats: PostgreSQLUUIDModel {}
 extension PlayerStats: Content {}
 extension PlayerStats: Parameter {}
-extension PlayerStats: Migration {}
+extension PlayerStats: Migration {
+    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+        return Database.create(self, on: connection) { builder in
+            try addProperties(to: builder)
+            builder.reference(from: \PlayerStats.playerId, to: \Player.id)
+        } }
+}

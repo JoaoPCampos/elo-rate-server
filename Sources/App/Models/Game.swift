@@ -13,6 +13,10 @@ final class Game: Codable {
     var id: UUID?
     let name: String
 
+    var players: Siblings<Game, Player, PlayerGamePivot> {
+        return siblings()
+    }
+
     init(id: UUID? = nil, name: String) {
         self.id = id
         self.name = name

@@ -31,11 +31,26 @@ private func playerRoutes(_ router: Router) {
         .get(EloRankingURL.Player.list.path, use: PlayerController.list)
 
     router
-        .get(EloRankingURL.Player.find.path, use: PlayerController.find)
+        .get(EloRankingURL.Player.find.path, Player.parameter, use: PlayerController.find)
 
     router
         .grouped(APIMiddleware.playerTokenAuth)
         .put(EloRankingURL.Player.update.path, use: PlayerController.update)
+
+    router
+        .grouped(APIMiddleware.playerTokenAuth)
+        .post(EloRankingURL.Player.find.path,
+              Player.parameter,
+              "/game/",
+              Game.parameter,
+              use: PlayerController.addGame)
+
+    router
+        .grouped(APIMiddleware.playerTokenAuth)
+        .get(EloRankingURL.Player.find.path,
+             Player.parameter,
+             "/games",
+              use: PlayerController.listGames)
 }
 
 private func gameRoutes(_ router: Router) {

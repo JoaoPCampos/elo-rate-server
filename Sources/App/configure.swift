@@ -44,5 +44,8 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: Player.self, database: .psql)
     migrations.add(model: Token.self, database: .psql)
     migrations.add(model: Game.self, database: .psql)
+    migrations.add(model: Match.self, database: .psql)
+    migrations.add(model: PlayerStats.self, database: .psql)
+    migrations.add(model: PlayerGamePivot.self, database: .psql)
     services.register(migrations)
 }

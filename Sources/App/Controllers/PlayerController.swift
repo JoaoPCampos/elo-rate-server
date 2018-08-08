@@ -34,11 +34,7 @@ final class PlayerController {
     }
 
     static func find(_ request: Request) throws -> Future<Player.Public> {
-        guard let playerId = request.query[UUID.self, at: "id"] else {
-            throw Abort(.badRequest, reason: "Missing parameter id.")
-        }
-
-        return try findPlayer(request, byId: playerId).convertToPublic()
+        return try request.parameters.next(Player.self).convertToPublic()
     }
 
     static func update(_ request: Request) throws -> Future<Player.Public> {
@@ -55,7 +51,32 @@ final class PlayerController {
                               username: oldPlayer.username,
                               email: player.email, //new email
                               password: encriptedPassword) //new password
-            }).update(on: request).convertToPublic()
+            })
+            .update(on: request)
+            .convertToPublic()
+    }
+
+    /// Pivot relation between Player and Game
+    static func addGame(_ request: Request) throws -> Future<HTTPStatus> {
+
+        let eventLoopCallback: (Player, Game) throws -> Future<HTTPStatus> = { player, game in
+            let pivot = try PlayerGamePivot(player.requireID(),game.requireID())
+            return pivot.save(on: request).transform(to: .created)
+        }
+
+        return try flatMap(to: HTTPStatus.self,
+                           request.parameters.next(Player.self),
+                           request.parameters.next(Game.self),
+                           eventLoopCallback)
+    }
+
+    static func listGames(_ request: Request) throws -> Future<[Game]> {
+        return try request
+            .parameters
+            .next(Player.self)
+            .flatMap(to: [Game].self) { player in
+                try player.games.query(on: request).all()
+        }
     }
 }
 
