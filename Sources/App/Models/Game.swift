@@ -13,8 +13,14 @@ final class Game: Codable {
     var id: UUID?
     let name: String
 
-    var players: Siblings<Game, Player, PlayerGamePivot> {
-        return siblings()
+    /// Relation 1 Game for * PlayerStats
+    var playerStats: Children<Game, PlayerStats> {
+        return children(\PlayerStats.gameId)
+    }
+
+    /// Relation 1 Game for * Matches
+    var matches: Children<Game, Match> {
+        return children(\Match.gameId)
     }
 
     init(id: UUID? = nil, name: String) {

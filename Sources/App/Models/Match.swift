@@ -13,24 +13,61 @@ enum MatchStatus: String {
     case pending
     case ongoing
     case completed
-    case aborted
 }
 
 final class Match: Codable {
     var id: UUID?
     let status: MatchStatus.RawValue
-    var challenger: Player.ID
-    var contender: Player.ID
+    let winner: String
+    let description: String
 
-    init(id: UUID? = nil, challenger: Player.ID, contender: Player.ID, status: MatchStatus.RawValue) {
+    /// Relation a Match belongs to only 1 challenger Player
+    var challengerId: Player.ID
+    var challenger: Parent<Match, Player> {
+        return parent(\Match.challengerId)
+    }
+
+    /// Relation a Match belongs to only 1 contender Player
+    var contenderId: Player.ID
+    var contender: Parent<Match, Player> {
+        return parent(\Match.contenderId)
+    }
+
+    /// Relation a Match belongs to only 1 Game
+    var gameId: Game.ID
+    var game: Parent<Match, Game> {
+        return parent(\Match.gameId)
+    }
+
+    init(id: UUID? = nil,
+         gameId: Game.ID,
+         status: MatchStatus.RawValue = MatchStatus.pending.rawValue,
+         winner: String = "",
+         description: String = "",
+         challengerId: Player.ID,
+         contenderId: Player.ID) {
         self.id = id
-        self.challenger = challenger
-        self.contender = contender
+        self.gameId = gameId
+        self.challengerId = challengerId
+        self.contenderId = contenderId
         self.status = status
+        self.winner = winner
+        self.description = description
     }
 }
 
+extension Match: PropertyDescribable {
+    typealias Object = Match
+}
 extension Match: PostgreSQLUUIDModel {}
 extension Match: Content {}
 extension Match: Parameter {}
-extension Match: Migration {}
+extension Match: Migration {
+    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+        return Database.create(self, on: connection) { builder in
+            try addProperties(to: builder)
+            builder.reference(from: \Match.challengerId, to: \Player.id)
+            builder.reference(from: \Match.contenderId, to: \Player.id)
+            builder.reference(from: \Match.gameId, to: \Game.id)
+        } }
+}

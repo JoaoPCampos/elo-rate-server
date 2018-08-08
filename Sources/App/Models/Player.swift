@@ -16,12 +16,19 @@ final class Player: Codable {
     var username: String
     var password: String
 
-    var games: Siblings<Player, Game, PlayerGamePivot> {
-        return siblings()
-    }
-
+    /// Relation 1 Player for * PlayerStats
     var playerStats: Children<Player, PlayerStats> {
         return children(\PlayerStats.playerId)
+    }
+
+    /// Relation 1 Player for * matches as challenger
+    var matchesAsChallenger: Children<Player, Match> {
+        return children(\Match.challengerId)
+    }
+
+    /// Relation 1 Player for * matches as contender
+    var matchesAsContender: Children<Player, Match> {
+        return children(\Match.contenderId)
     }
 
     init(id: UUID? = nil, username: String, email: String, password: String) {

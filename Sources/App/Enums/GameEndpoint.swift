@@ -4,31 +4,20 @@
 //
 //  Created by João Campos on 03/08/2018.
 //
+import Vapor
 
 extension EloRankingURL {
-    enum Game: String {
+    enum Game {
         case create
-        case register
-//        case accept
         case list
-//        case winner
-//        case loser
 
         var path: String {
             switch self {
             case .create:
-                return EloRankingURL.baseURL + "game"
-
-            case .register:
-                return EloRankingURL.baseURL + "game/" + self.rawValue
+                return baseURL + "game/"
 
             case .list:
-                return EloRankingURL.baseURL + "games"
-//
-//            case .accept,
-//                 .loser,
-//                 .winner:
-//                return EloRankingURL.baseURL + "game/" + self.rawValue
+                return baseURL + "games/"
             }
         }
     }

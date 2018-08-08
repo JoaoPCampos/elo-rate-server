@@ -12,13 +12,13 @@ import HTTP
 final class EloRankingMail {
     static func send(_ request: Request, to email: String, subject: String, username: String, password newPassword: String) throws -> Future<HTTPStatus> {
         guard let emailPassword = Environment.get("EMAIL_PASSWORD") else {
-            throw Abort(.forbidden, reason: "Password not found for sender email.")
+            throw Abort(.notFound, reason: "Password for sender email not found.")
         }
 
         let dir = try request.make(DirectoryConfig.self)
         let path =  dir.workDir + "Resources/Templates/recover_password.html"
         guard let data = FileManager.default.contents(atPath: path), var htmlStr = String(data: data, encoding: .utf8) else {
-            throw Abort(.forbidden, reason: "Email template file not found.")
+            throw Abort(.notFound, reason: "Email template file not found.")
         }
 
         let smtp = SMTP(

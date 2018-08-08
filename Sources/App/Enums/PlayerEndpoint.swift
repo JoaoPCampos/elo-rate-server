@@ -6,11 +6,13 @@
 //
 
 extension EloRankingURL {
-    enum Player: String {
+    enum Player {
         case create
         case list
         case find
         case update
+        case stats
+        case matches
 
         var path: String {
             switch self {
@@ -19,10 +21,16 @@ extension EloRankingURL {
                 return baseURL + "player/"
                 
             case .list:
-                return baseURL + "players"
+                return baseURL + "players/"
 
             case .update:
-                return baseURL + "player/" + self.rawValue
+                return baseURL + "player/update/"
+
+            case .stats:
+                return baseURL + "player/stats/"
+
+            case .matches:
+                return baseURL + "player/matches/"
             }
         }
     }
