@@ -16,12 +16,15 @@ final class AuthController {
             throw Abort(.notFound, reason: "Player not found")
         }
 
-        let newToken = try Token.generate(for: player)
-
         return Token
-            .find(playerId, on: request)
-            .flatMap({ (token) -> EventLoopFuture<Token> in
-                return (token != nil) ? newToken.update(on: request) : newToken.create(on: request)
+            .query(on: request)
+            .all()
+            .flatMap({ tokens -> Future<Token> in
+                guard let token = tokens.filter({ $0.playerId == playerId }).first else {
+                    return try Token.new(for: player).create(on: request)
+                }
+
+                return try token.refresh().update(on: request)
             }).convertToPublic()
     }
     

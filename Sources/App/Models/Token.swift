@@ -16,27 +16,34 @@ final class Token: Codable {
     var token: String
     var playerId: Player.ID
     
-    init(token: String, playerId: Player.ID) {
+    init(id: UUID? = nil, token: String, playerId: Player.ID) {
+        self.id = id
         self.token = token
         self.playerId = playerId
     }
 
-    final class Public: Codable {
-        var token: String
+    func refresh() throws -> Token {
+        token = try CryptoRandom().generateData(count: 16).base64EncodedString()
+        return self
+    }
 
-        init(token: String) {
+    final class Public: Codable {
+        let token: String
+        var playerId: Player.ID
+
+        init(token: String, playerId: Player.ID) {
             self.token = token
+            self.playerId = playerId
         }
     }
 }
 
 extension Token {
-    static func generate(for user: Player) throws -> Token {
+    static func new(for user: Player) throws -> Token {
         let random = try CryptoRandom().generateData(count: 16)
-        
-        return try Token(
-            token: random.base64EncodedString(),
-            playerId: user.requireID())
+
+        return try Token(token: random.base64EncodedString(),
+                         playerId: user.requireID())
     }
 }
 
@@ -57,7 +64,7 @@ extension Token.Public: Content {}
 
 extension Token {
     func convertToPublic() -> Token.Public {
-        return Token.Public(token: token)
+        return Token.Public(token: token, playerId: playerId)
     }
 }
 
