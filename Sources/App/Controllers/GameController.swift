@@ -25,7 +25,7 @@ final class GameController {
         return Game.query(on: request).all()
     }
 
-    static func register(_ request: Request) throws -> Future<HTTPStatus> {
+    static func register(_ request: Request) throws -> Future<PlayerStats> {
         let player = try request.requireAuthenticated(Player.self)
 
         return try request
@@ -38,7 +38,6 @@ final class GameController {
                 return PlayerStats(playerId: playerId, gameId: gameId)
             })
             .create(on: request)
-            .transform(to: .ok)
     }
 
     static func challenge(_ request: Request) throws -> Future<Match> {

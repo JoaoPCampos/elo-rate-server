@@ -34,18 +34,18 @@ private func playerRoutes(_ router: Router) {
         .get(EloRankingURL.Player.list.path, use: PlayerController.list)
 
     router
-        .grouped(APIMiddleware.simple)
-        .get(EloRankingURL.baseURL,
-             "/player/", Player.parameter,
-             use: PlayerController.find)
-
-    router
         .grouped(APIMiddleware.playerTokenAuth)
         .get(EloRankingURL.Player.stats.path, use: PlayerController.stats)
 
     router
         .grouped(APIMiddleware.playerTokenAuth)
         .get(EloRankingURL.Player.matches.path, use: PlayerController.matches)
+
+    router
+        .grouped(APIMiddleware.simple)
+        .get(EloRankingURL.baseURL,
+             "/player/", Player.parameter,
+             use: PlayerController.find)
 
     router
         .grouped(APIMiddleware.playerTokenAuth)
@@ -58,6 +58,7 @@ private func gameRoutes(_ router: Router) {
         .post(EloRankingURL.Game.create.path, use: GameController.create)
 
     router
+        .grouped(APIMiddleware.simple)
         .get(EloRankingURL.Game.list.path, use: GameController.list)
 
     router
@@ -76,7 +77,7 @@ private func gameRoutes(_ router: Router) {
 
     router
         .grouped(APIMiddleware.playerTokenAuth)
-        .post(EloRankingURL.baseURL,
+        .put(EloRankingURL.baseURL,
               "/game/", Game.parameter,
               "/match/", Match.parameter,
               "/accept/",
@@ -84,7 +85,7 @@ private func gameRoutes(_ router: Router) {
 
     router
         .grouped(APIMiddleware.playerTokenAuth)
-        .post(EloRankingURL.baseURL,
+        .put(EloRankingURL.baseURL,
               "/game/", Game.parameter,
               "/match/", Match.parameter,
               "/winner/",
@@ -92,7 +93,7 @@ private func gameRoutes(_ router: Router) {
 
     router
         .grouped(APIMiddleware.playerTokenAuth)
-        .post(EloRankingURL.baseURL,
+        .put(EloRankingURL.baseURL,
               "/game/", Game.parameter,
               "/match/", Match.parameter,
               "/loser/",

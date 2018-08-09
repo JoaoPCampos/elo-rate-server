@@ -27,7 +27,7 @@ final class PlayerStats: Codable {
         return parent(\PlayerStats.gameId)
     }
 
-    init(id: UUID? = nil, elo: Int = 1300, wins: Int = 0, losses: Int = 0, playerId: Player.ID, gameId: Game.ID) {
+    init(id: UUID? = nil, elo: Int = 1200, wins: Int = 0, losses: Int = 0, playerId: Player.ID, gameId: Game.ID) {
         self.id = id
         self.elo = elo
         self.wins = wins

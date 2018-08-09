@@ -38,7 +38,7 @@ final class AuthController {
                 return token
                 
             }).delete(on: request)
-            .transform(to: .ok)
+            .transform(to: .accepted)
     }
 
     static func recover(_ request: Request) throws -> Future<HTTPStatus> {
