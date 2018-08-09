@@ -22,11 +22,10 @@ ewthe token given for further API requests that require authentication.
             Authorization: Basic YTph (basic auth uses username:password encode base 64)
         
 
-+ Response 200 (application/json)
++ Response 200
 
         {
-            "token": "Nl/1B3AL2iYQfn+h05FLKw==",
-            "email": "email@email.com"
+            "token": "Nl/1B3AL2iYQfn+h05FLKw=="
         }
         
         
@@ -39,14 +38,14 @@ ewthe token given for further API requests that require authentication.
             Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
 
 
-+ Response 204
++ Response 203
 
 
 ### Recover Password [POST /auth/recover{?email}]
 
 + Parameters
 
-    + email: playerEmail (String) - Email of the player to send a new password
+    + email: j0cs@gmail.com (String) - Email of the player to send a new password
     
     
 + Request (application/json)
@@ -54,7 +53,7 @@ ewthe token given for further API requests that require authentication.
     + Headers
     
 
-+ Response 204 (application/json)
++ Response 200
 
 
 ## Player Services [/player]
@@ -63,25 +62,30 @@ ewthe token given for further API requests that require authentication.
 
 + Request (application/json)
 
+    + Attributes
+
+        + username: j0cs (required, string) - Username for login
+        + email: j0cs@gmail.com (required, string) - Email to recover password from
+        + password: j0cs123 (required, string) - Password for login
+
+
     + Body
 
             {
-                "username": "Username",
-                "email": "email@email.com",
-                "password": "password"
+                "username": "j0cs",
+                "email": "j0cs@email.com",
+                "password": "j0cs123"
             }
             
 
-+ Response 201 (application/json)
++ Response 200
 
     + Body
 
             {
-                "email": "email@email.com",
-                "username": "Username",
-                "losses": 0,
-                "elo": 1300,
-                "wins": 0
+                "id": "7FCACB0ECA9349DD901933A8F6214A0D",
+                "username": "j0cs",
+                "email": "j0cs@email.com"
             }
 
 
@@ -90,50 +94,101 @@ ewthe token given for further API requests that require authentication.
 + Request (application/json)
     
     
-+ Response 200 (application/json)
-
-    + Headers
-
++ Response 200
 
     + Body
 
-            [{
-                "email": "email@email.com",
-                "username": "Username",
-                "losses": 0,
-                "elo": 1300,
-                "wins": 0
-            }]
-            
-### Find Player [GET /player{?email}]
+            [
+                {
+                    "id": "7FCACB0ECA9349DD901933A8F6214A0D",
+                    "username": "j0cs",
+                    "email": "j0cs@email.com"
+                }
+            ]
+
+
+### List Player Stats [GET /player/stats]
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+    
+    
++ Response 200
+
+    + Body
+
+            [
+                {
+                    "losses": 0,
+                    "id": "F9722FEAA3D44DEA8F03F7FE9696C8AB",
+                    "playerId": "EC3E25B285C14111A9898AAA7B0E4A93",
+                    "gameId": "D2E47D54A71E425E990D4C6537C5B942",
+                    "elo": 1200,
+                    "wins": 0
+                }
+            ]
+
+
+### List Player Matches [GET /player/matches]
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+    
+    
++ Response 200
+
+    + Body
+
+            [
+                {
+                    "status": "completed",
+                    "winner": "7FCACB0ECA9349DD901933A8F6214A0D",
+                    "gameId": "D2E47D54A71E425E990D4C6537C5B942",
+                    "id": "9A26AB48F609424D98EE63BF72C2C61E",
+                    "challengerId": "EC3E25B285C14111A9898AAA7B0E4A93",
+                    "description": "Some description of match",
+                    "contenderId": "7FCACB0ECA9349DD901933A8F6214A0D"
+                }
+            ]
+
+       
+### Find Player [GET /player/{id}]
 
 + Parameters
 
-    + email: playerEmail (string) - Email of the player to find
+    + id: 7FCACB0ECA9349DD901933A8F6214A0D (required,string) - Player id to find
 
 
 + Request (application/json)
 
 
-+ Response 200 (application/json)
-
-    + Headers
-
++ Response 200
 
     + Body
 
             {
-                "email": "email@email.com",
-                "username": "Username",
-                "losses": 0,
-                "elo": 1300,
-                "wins": 0
+                "id": "7FCACB0ECA9349DD901933A8F6214A0D",
+                "username": "j0cs",
+                "email": "j0cs@email.com"
             }
 
 
-### Update Player [PUT /player/update{?email}]
+### Update Player [PUT /player/update/]
 
 + Request (application/json)
+
+    + Attributes
+
+        + username: j0cs (string) - Optional Username for login
+        + email: j0cs@gmail.com (required, string) - Optional Email to recover password from
+        + password: j0cs123 (required, string) - Optional Password for login
+
 
     + Headers
 
@@ -143,116 +198,203 @@ ewthe token given for further API requests that require authentication.
     + Body
 
             {
-                "username": "New username",
-                "email": "email@email.com",
-                "password": "new password"
+                "username": "j0cs",
+                "email": "j0cs@email.com",
+                "password": "j0cs123"
             }
 
 
-+ Response 200 (application/json)
-
-    + Headers
-
++ Response 200
 
     + Body
 
             {
-                "email": "email@email.com",
-                "username": "New username",
-                "losses": 0,
-                "elo": 1300,
-                "wins": 0
+                "id": "7FCACB0ECA9349DD901933A8F6214A0D",
+                "username": "j0cs",
+                "email": "j0cs@email.com"
             }
 
 
 ## Game Services [/game]
 
-### Create Game [POST /game{?email}]
+### Create Game [POST /game/]
+
++ Request (application/json)
+
+    + Attributes
+
+        + name: Game name (required,string) - Unique name for game
+
+
+    + Headers
+
+            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+            
+            
+    + Body
+
+            {
+                "name": "Game name"
+            }
+
+
++ Response 200
+
+    + Body
+
+            {
+                "id": "D2E47D54A71E425E990D4C6537C5B942",
+                "name": "j0cs"
+            }
+
+### List Games [GET /games/]
+
++ Request (application/json)
+    
+    
++ Response 200
+
+    + Body
+
+            [
+                {
+                    "id": "D2E47D54-A71E-425E-990D-4C6537C5B942",
+                    "name": "Darts"
+                }
+            ]
+
+
+### Register Player in Game [POST /game/{id}/register/]
 
 + Parameters
 
-    + email: contenderEmail (String) - Email of the player to challenge
-    
+    + id: D2E47D54A71E425E990D4C6537C5B942 (required,string) - Game id to register player
+
 
 + Request (application/json)
 
-    + Headers
-    
-            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
 
++ Response 200
 
     + Body
-    
+
             {
-                "name": "Game playerA vs playerB"
+                "losses": 0,
+                "id": "F9722FEAA3D44DEA8F03F7FE9696C8AB",
+                "playerId": "EC3E25B285C14111A9898AAA7B0E4A93",
+                "gameId": "D2E47D54A71E425E990D4C6537C5B942",
+                "elo": 1200,
+                "wins": 0
             }
 
 
-+ Response 201 (application/json)
+### Challenge other Player in Game [POST /game/{gameId}/challenge/{playerId}]
+
++ Parameters
+
+    + gameId: D2E47D54A71E425E990D4C6537C5B942 (required,string) - Game id of match to create
+    + playerId: 7FCACB0ECA9349DD901933A8F6214A0D (required,string) - player id to challenge
+
+
++ Request (application/json)
+
+
++ Response 200
 
     + Body
-    
+
             {
-                "contender": "email2@email2.com",
-                "status": 0,
-                "name": "Game playerA vs playerB",
-                "challenger": "email@email.com"
+                "status": "pending",
+                "winner": "",
+                "gameId": "D2E47D54A71E425E990D4C6537C5B942",
+                "id": "9A26AB48F609424D98EE63BF72C2C61E",
+                "challengerId": "EC3E25B285C14111A9898AAA7B0E4A93",
+                "description": "",
+                "contenderId": "7FCACB0ECA9349DD901933A8F6214A0D"
             }
 
 
-### Accept Game [POST /game/accept]
+### Accept Game Match [POST /game/{gameId}/match/{matchId}/accept]
+
++ Parameters
+
+    + gameId: D2E47D54A71E425E990D4C6537C5B942 (required,string) - Game id of match to accept
+    + matchId: 9A26AB48F609424D98EE63BF72C2C61E (required,string) - Match id to accept
+
 
 + Request (application/json)
 
-    + Headers
-    
-            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
-        
 
-+ Response 204 (application/json)
-    
-
-### List Games [GET /games]
-
-+ Request (application/json)
-
-    + Headers
-    
-            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
-
-
-
-+ Response 201 (application/json)
++ Response 200
 
     + Body
-    
-            [{
-                "contender": "email2@email2.com",
-                "status": 0,
-                "name": "Game playerA vs playerB",
-                "challenger": "email@email.com"
-            }]
+
+            {
+                "status": "ongoing",
+                "winner": "",
+                "gameId": "D2E47D54A71E425E990D4C6537C5B942",
+                "id": "9A26AB48F609424D98EE63BF72C2C61E",
+                "challengerId": "EC3E25B285C14111A9898AAA7B0E4A93",
+                "description": "",
+                "contenderId": "7FCACB0ECA9349DD901933A8F6214A0D"
+            }
 
 
-### Win Game [POST /game/winner]
+### Win Game Match [POST /game/{gameId}/match/{matchId}/winner]
+
++ Parameters
+
+    + gameId: D2E47D54A71E425E990D4C6537C5B942 (required,string) - Game id of match to win
+    + matchId: 9A26AB48F609424D98EE63BF72C2C61E (required,string) - Match id to win
+
 
 + Request (application/json)
 
-    + Headers
-    
-            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+    + Attributes
+
+        + description: Some description of match (string) - Optional description of match
 
 
-+ Response 204 (application/json)
-    
++ Response 200
 
-### Lose Game [POST /game/loser]
+    + Body
+
+            {
+                "status": "completed",
+                "winner": "7FCACB0ECA9349DD901933A8F6214A0D",
+                "gameId": "D2E47D54A71E425E990D4C6537C5B942",
+                "id": "9A26AB48F609424D98EE63BF72C2C61E",
+                "challengerId": "EC3E25B285C14111A9898AAA7B0E4A93",
+                "description": "Some description of match",
+                "contenderId": "7FCACB0ECA9349DD901933A8F6214A0D"
+            }
+
+
+### Lose Game Match [POST /game/{gameId}/match/{matchId}/loser]
+
++ Parameters
+
+    + gameId: D2E47D54A71E425E990D4C6537C5B942 (required,string) - Game id of match to lose
+    + matchId: 9A26AB48F609424D98EE63BF72C2C61E (required,string) - Match id to lose
+
 
 + Request (application/json)
 
-    + Headers
-    
-            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
+    + Attributes
+
+        + description: Some description of match (string) - Optional description of match
 
 
-+ Response 204 (application/json)
++ Response 200
+
+    + Body
+
+            {
+                "status": "completed",
+                "winner": "7FCACB0ECA9349DD901933A8F6214A0D",
+                "gameId": "D2E47D54A71E425E990D4C6537C5B942",
+                "id": "9A26AB48F609424D98EE63BF72C2C61E",
+                "challengerId": "EC3E25B285C14111A9898AAA7B0E4A93",
+                "description": "Some description of match",
+                "contenderId": "7FCACB0ECA9349DD901933A8F6214A0D"
+            }
