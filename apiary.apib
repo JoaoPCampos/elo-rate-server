@@ -9,7 +9,7 @@ Elo ranking is a simple API allowing consumers to create and register games
 against other oponnents, updating their elo according to the outcome of the game.
 
 Start by creating a player, login in using the username and password, and save
-ewthe token given for further API requests that require authentication.
+the token given for further API requests that require authentication.
 
 ## Auth Services [/auth]
 
@@ -29,18 +29,6 @@ ewthe token given for further API requests that require authentication.
         }
         
         
-### Logout Player [DELETE /auth/logout]
-
-+ Request (application/json)
-
-    + Headers
-
-            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
-
-
-+ Response 203
-
-
 ### Recover Password [POST /auth/recover{?email}]
 
 + Parameters
@@ -56,38 +44,19 @@ ewthe token given for further API requests that require authentication.
 + Response 200
 
 
-## Player Services [/player]
-
-### Create Player [POST /player]
+### Logout Player [DELETE /auth/logout]
 
 + Request (application/json)
 
-    + Attributes
+    + Headers
 
-        + username: j0cs (required, string) - Username for login
-        + email: j0cs@gmail.com (required, string) - Email to recover password from
-        + password: j0cs123 (required, string) - Password for login
+            Authorization: Bearer Nl/1B3AL2iYQfn+h05FLKw== (token retrieved from login)
 
 
-    + Body
++ Response 203
 
-            {
-                "username": "j0cs",
-                "email": "j0cs@email.com",
-                "password": "j0cs123"
-            }
-            
 
-+ Response 200
-
-    + Body
-
-            {
-                "id": "7FCACB0ECA9349DD901933A8F6214A0D",
-                "username": "j0cs",
-                "email": "j0cs@email.com"
-            }
-
+## Player Services [/player]
 
 ### List Players [GET /players]
 
@@ -179,6 +148,37 @@ ewthe token given for further API requests that require authentication.
             }
 
 
+### Create Player [POST /player]
+
++ Request (application/json)
+
+    + Attributes
+
+        + username: j0cs (required, string) - Username for login
+        + email: j0cs@gmail.com (required, string) - Email to recover password from
+        + password: j0cs123 (required, string) - Password for login
+
+
+    + Body
+
+            {
+                "username": "j0cs",
+                "email": "j0cs@email.com",
+                "password": "j0cs123"
+            }
+            
+
++ Response 200
+
+    + Body
+
+            {
+                "id": "7FCACB0ECA9349DD901933A8F6214A0D",
+                "username": "j0cs",
+                "email": "j0cs@email.com"
+            }
+
+
 ### Update Player [PUT /player/update/]
 
 + Request (application/json)
@@ -186,8 +186,8 @@ ewthe token given for further API requests that require authentication.
     + Attributes
 
         + username: j0cs (string) - Optional Username for login
-        + email: j0cs@gmail.com (required, string) - Optional Email to recover password from
-        + password: j0cs123 (required, string) - Optional Password for login
+        + email: j0cs@gmail.com (string) - Optional Email to recover password from
+        + password: j0cs123 (string) - Optional Password for login
 
 
     + Headers
@@ -216,6 +216,23 @@ ewthe token given for further API requests that require authentication.
 
 
 ## Game Services [/game]
+
+### List Games [GET /games/]
+
++ Request (application/json)
+    
+    
++ Response 200
+
+    + Body
+
+            [
+                {
+                    "id": "D2E47D54-A71E-425E-990D-4C6537C5B942",
+                    "name": "Darts"
+                }
+            ]
+
 
 ### Create Game [POST /game/]
 
@@ -246,22 +263,6 @@ ewthe token given for further API requests that require authentication.
                 "id": "D2E47D54A71E425E990D4C6537C5B942",
                 "name": "j0cs"
             }
-
-### List Games [GET /games/]
-
-+ Request (application/json)
-    
-    
-+ Response 200
-
-    + Body
-
-            [
-                {
-                    "id": "D2E47D54-A71E-425E-990D-4C6537C5B942",
-                    "name": "Darts"
-                }
-            ]
 
 
 ### Register Player in Game [POST /game/{id}/register/]
