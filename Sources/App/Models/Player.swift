@@ -7,61 +7,66 @@
 
 import Vapor
 import Foundation
-import FluentSQLite
+import FluentPostgreSQL
 import Authentication
 
 final class Player: Codable {
-    var email: String?
+    var id: UUID?
+    var email: String
     var username: String
     var password: String
 
-    let elo: Int
-    let wins: Int
-    let losses: Int
+    /// Relation 1 Player for * PlayerStats
+    var playerStats: Children<Player, PlayerStats> {
+        return children(\PlayerStats.playerId)
+    }
 
-    init(username: String, email: String?, password: String, elo: Int = 1300, wins: Int = 0, losses: Int = 0) {
+    /// Relation 1 Player for * matches as challenger
+    var matchesAsChallenger: Children<Player, Match> {
+        return children(\Match.challengerId)
+    }
+
+    /// Relation 1 Player for * matches as contender
+    var matchesAsContender: Children<Player, Match> {
+        return children(\Match.contenderId)
+    }
+
+    init(id: UUID? = nil, username: String, email: String, password: String) {
         self.username = username
         self.email = email
         self.password = password
-        self.elo = elo
-        self.wins = wins
-        self.losses = losses
-    }
-
-    final class Create: Codable {
-        let username: String
-        let email: String
-        let password: String
-
-        init(username: String, email: String, password: String) {
-            self.username = username
-            self.email = email
-            self.password = password
-        }
+        self.id = id
     }
 
     final class Public: Codable {
+        var id: UUID?
         var username: String
-        var email: String?
+        var email: String
 
-        let elo: Int
-        let wins: Int
-        let losses: Int
-
-        init(username: String, email: String?, elo: Int, wins: Int, losses: Int) {
+        init(id: UUID? = nil, username: String, email: String) {
             self.username = username
             self.email = email
-            self.elo = elo
-            self.wins = wins
-            self.losses = losses
+            self.id = id
         }
     }
+}
+
+extension Player: PostgreSQLUUIDModel {}
+extension Player: Content {}
+extension Player: Parameter {}
+extension Player: Migration {
+    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+        return Database.create(self, on: connection) { builder in
+            try addProperties(to: builder)
+            builder.unique(on: \Player.email)
+            builder.unique(on: \Player.username)
+        } }
 }
 
 extension Player.Public: Content {}
 extension Player {
     func convertToPublic() -> Player.Public {
-        return Player.Public(username: username, email: email, elo: elo, wins: wins, losses: losses)
+        return Player.Public(id: id, username: username, email: email)
     }
 }
 
@@ -71,12 +76,6 @@ extension Future where T: Player {
             return player.convertToPublic()
         }
     }
-}
-
-extension Player: Model {
-    typealias Database = SQLiteDatabase
-    typealias ID = String
-    public static var idKey: IDKey = \Player.email
 }
 
 extension Player: PropertyDescribable {
@@ -91,7 +90,3 @@ extension Player: BasicAuthenticatable {
 extension Player: TokenAuthenticatable {
     typealias TokenType = Token
 }
-
-extension Player: Content {}
-extension Player: Parameter {}
-extension Player: Migration {}

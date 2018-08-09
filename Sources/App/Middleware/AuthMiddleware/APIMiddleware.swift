@@ -14,6 +14,7 @@ final class APIMiddleware {
     private enum AuthType {
         case basic
         case token
+        case none
     }
     
     private let authType: AuthType
@@ -21,6 +22,8 @@ final class APIMiddleware {
     private init(authType: AuthType) {
         self.authType = authType
     }
+
+    static let simple: [Middleware] = [APIMiddleware(authType: .none)]
     
     static let playerBasicAuth: [Middleware] = [
         APIMiddleware(authType: .basic),
@@ -31,11 +34,6 @@ final class APIMiddleware {
         APIMiddleware(authType: .token),
         Player.tokenAuthMiddleware(),
         Player.guardAuthMiddleware()]
-    
-    static let adminBasicAuth: [Middleware] = [
-        APIMiddleware(authType: .basic),
-        AdminPlayer.basicAuthMiddleware(using: BCryptDigest()),
-        AdminPlayer.guardAuthMiddleware()]
 }
 
 extension APIMiddleware: Middleware {
@@ -75,6 +73,11 @@ extension APIMiddleware: Middleware {
                     }
                     return try next.respond(to: request)
                 })
+
+        case .none:
+            return try next.respond(to: request).catchFlatMap({ (error) -> (EventLoopFuture<Response>) in
+                throw Abort(.notFound, reason: error.localizedDescription)
+            })
         }
     }
 }

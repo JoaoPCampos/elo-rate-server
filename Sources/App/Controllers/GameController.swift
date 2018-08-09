@@ -7,150 +7,181 @@
 
 import Vapor
 import Crypto
+import Foundation
 
 final class GameController {
 
-    static func create(_ request: Request) throws -> Future<Game.Public> {
-
-        guard let contenderEmail = request.query[String.self, at: "email"] else {
-            throw Abort(.badRequest, reason: "Missing contender email")
-        }
-
+    static func create(_ request: Request) throws -> Future<Game> {
         return try request
             .content
-            .decode(Game.Create.self)
-            .map({ game -> Future<Game> in
-                return try create(game: game, versus: contenderEmail, request)
-            }).flatMap({ (newGame) -> EventLoopFuture<Game.Public> in
-                return newGame.convertToPublic()
-            })
+            .decode(Game.self)
+            .map({ game -> Game in
+                let newGame = Game(id: game.id, name: game.name)
+                return newGame
+            }).create(on: request)
     }
 
-    static func accept(_ request: Request) throws -> Future<Game.Public> {
-        let player = try request.requireAuthenticated(Player.self)
-        guard let email = player.email else { throw Abort(.unauthorized, reason: "Unauthorized Player") }
+    static func list(_ request: Request) throws -> Future<[Game]> {
+        return Game.query(on: request).all()
+    }
 
-        return Game
-            .query(on: request)
-            .all()
-            .map({ games -> Game in
-                guard let game = games.filter({ $0.contenderEmail == email }).first else {
-                    throw Abort(.unauthorized, reason: "\(player.username) is not able to accept challenge")
+    static func register(_ request: Request) throws -> Future<PlayerStats> {
+        let player = try request.requireAuthenticated(Player.self)
+
+        return try request
+            .parameters
+            .next(Game.self)
+            .map({ game -> PlayerStats in
+                guard let playerId = player.id, let gameId = game.id else {
+                    throw Abort(.notFound, reason: "Either player or game id not found.)")
                 }
-
-                
-                let acceptedGame = Game(id: game.id,
-                                        name: game.name,
-                                        challengerEmail: game.challengerEmail,
-                                        contenderEmail: game.contenderEmail,
-                                        challenger: game.challenger,
-                                        contender: game.contender,
-                                        status: GameStatus.accepted.rawValue)
-                return acceptedGame
+                return PlayerStats(playerId: playerId, gameId: gameId)
             })
-            .update(on: request).convertToPublic()
+            .create(on: request)
     }
 
-    static func list(_ request: Request) throws -> Future<[Game.Public]> {
-        let player = try request.requireAuthenticated(Player.self)
-        guard let email = player.email else { throw Abort(.unauthorized, reason: "Unauthorized Player") }
+    static func challenge(_ request: Request) throws -> Future<Match> {
+        let challenger = try request.requireAuthenticated(Player.self)
 
-        return Game
-            .query(on: request)
-            .all()
-            .map({ games -> [Game.Public] in
-                return games
-                    .filter({ $0.challengerEmail == email || $0.contenderEmail == email})
-                    .map({ return $0.convertToPublic() })
-            })
+        return try flatMap(to: Match.self,
+                       request.parameters.next(Game.self),
+                       request.parameters.next(Player.self)) { game, contender in
+                        guard let challengerId = challenger.id,
+                            let contenderId = contender.id,
+                            let gameId = game.id else {
+                            throw Abort(.notFound, reason: "Either challenger player id, contender player id and or game id, not found.")
+                        }
+
+                        return try existsPlayer(withId: challengerId, inGame: game, request)
+                            .flatMap({ (exists) -> Future<Bool> in
+                                return try existsPlayer(withId: contenderId, inGame: game, request)
+                            })
+                            .flatMap({ (exists) -> Future<Match> in
+                                guard challengerId != contenderId else {
+                                    throw Abort(.conflict, reason: "Challenger id must be different from Contender id.")
+                                }
+                                let match = Match(gameId: gameId,
+                                                  challengerId: challengerId,
+                                                  contenderId: contenderId)
+                                return match.create(on: request)
+                            })
+        }
     }
 
-    static func winner(_ request: Request) throws -> Future<HTTPStatus> {
-        return try update(request, isWinner: true)
+    static func accept(_ request: Request) throws -> Future<Match> {
+        return try updateMatch(request, status: MatchStatus.pending, winner: false)
     }
 
-    static func loser(_ request: Request) throws -> Future<HTTPStatus> {
-        return try update(request, isWinner: false)
+    static func winner(_ request: Request) throws -> Future<Match> {
+        return try updateMatch(request, status: MatchStatus.ongoing, winner: true)
+    }
+
+    static func loser(_ request: Request) throws -> Future<Match> {
+        return try updateMatch(request, status: MatchStatus.ongoing, winner: false)
     }
 }
 
 extension GameController {
 
-    private static func create(game: Game.Create, versus contenderEmail: String, _ request: Request) throws -> Future<Game> {
-        let player = try request.requireAuthenticated(Player.self)
-        guard let email = player.email else { throw Abort(.unauthorized, reason: "Unauthorized Player") }
-
-        guard player.email != contenderEmail else {
-            throw Abort(.conflict, reason: "Challenger \(player.username) must be different from contender.")
-        }
-
-        return try PlayerController
-            .getPlayer(request, byEmail: contenderEmail)
-            .map({ contender -> Game in
-                return Game(name: game.name,
-                            challengerEmail: email,
-                            contenderEmail: contenderEmail,
-                            challenger: player.username,
-                            contender: contender.username)
-            }).create(on: request)
-    }
-
-    private static func update(_ request: Request, isWinner: Bool) throws -> Future<HTTPStatus> {
-        let player = try request.requireAuthenticated(Player.self)
-
-        guard let email = player.email else { throw Abort(.unauthorized, reason: "Unauthorized Player") }
-
-        return Game
+    static private func existsPlayer(withId playerId: UUID, inGame game: Game, _ request: Request) throws -> Future<Bool> {
+        return try game
+            .playerStats
             .query(on: request)
             .all()
-            .map({ games -> Game in
-                guard let game = games.filter({ $0.challengerEmail == email }).first else {
-                    throw Abort(.unauthorized, reason: "\(player.username) is not able to update challenge")
+            .map({ playerStats -> Bool in
+                guard let _ = playerStats.first(where: { $0.playerId == playerId } ) else {
+                    throw Abort(.notFound, reason: "Player with id \(playerId) not registered in Game \(game.name)")
                 }
-
-                let updatedGame = Game(id: game.id,
-                                       name: game.name,
-                                       challengerEmail: game.challengerEmail,
-                                       contenderEmail: game.contenderEmail,
-                                       challenger: game.challenger,
-                                       contender: game.contender,
-                                       status: GameStatus.completed.rawValue)
-
-                return updatedGame
-            })
-            .update(on: request)
-            .flatMap({ game -> EventLoopFuture<HTTPStatus> in
-                return try updateElo(request, game: game, isWinner: isWinner)
+                return true
             })
     }
 
-    static func updateElo(_ request: Request, game: Game, isWinner: Bool) throws -> Future<HTTPStatus> {
-        let player = try request.requireAuthenticated(Player.self)
+    static private func updateMatch(forMatch match: Match,
+                                    inGame game: Game,
+                                    withStatus status: MatchStatus,
+                                    winner: Bool,
+                                    _ request: Request) throws -> Match {
+        switch status {
+        case .pending:
+            return Match(id: match.id,
+                         gameId: match.gameId,
+                         status: MatchStatus.ongoing.rawValue,
+                         challengerId: match.challengerId,
+                         contenderId: match.contenderId)
 
-        return try PlayerController
-            .getPlayer(request, byEmail: game.contenderEmail)
-            .flatMap({ (contender) -> EventLoopFuture<Player> in
-                let contenderRating = Rating(currentElo: CGFloat(contender.elo), winner: !isWinner)
+        case .ongoing:
 
-                let updatedContender = Player(username: contender.username,
-                                              email: contender.email,
-                                              password: contender.password,
-                                              elo: contenderRating.calculate(versusElo: player.elo),
-                                              wins: contender.wins,
-                                              losses: contender.losses)
-                return updatedContender.update(on: request)
-                    .flatMap({ newContender -> EventLoopFuture<Player> in
+            /// Check if description property came in the request body to update Match with
+            let description = try Match.describe(withKeyPath: \Match.description, for: request)
+            
+            /// Update elos according to match outcome
+            _ = try updateElos(forMatch: match, inGame: game, asWinner: winner, request)
 
-                        let meRating = Rating(currentElo: CGFloat(player.elo), winner: isWinner)
+            return Match(id: match.id,
+                         gameId: match.gameId,
+                         status: MatchStatus.completed.rawValue,
+                         winner: winner ? match.contenderId.uuidString : match.challengerId.uuidString,
+                         description: description ?? "",
+                         challengerId: match.challengerId,
+                         contenderId: match.contenderId)
 
-                        let updatedMe = Player(username: player.username,
-                                               email: player.email,
-                                               password: player.password,
-                                               elo: meRating.calculate(versusElo: contender.elo),
-                                               wins: player.wins,
-                                               losses: player.losses)
-                        return updatedMe.update(on: request)
+        case .completed:
+            return match //do nothing
+        }
+    }
+
+    static private func updateElos(forMatch match: Match, inGame game: Game, asWinner winner: Bool, _ request: Request) throws -> Future<HTTPStatus> {
+        return try game.playerStats
+            .query(on: request)
+            .all()
+            .flatMap({ playerStats -> EventLoopFuture<HTTPStatus> in
+                let bothPlayers = playerStats.filter({ return $0.playerId == match.challengerId || $0.playerId == match.contenderId })
+
+                guard let challengerStats = bothPlayers.filter({ return $0.playerId == match.challengerId }).first,
+                    let contenderStats = bothPlayers.filter({ return $0.playerId == match.contenderId }).first else {
+                        throw Abort(.notFound, reason:"Could not find either challenger player id or contender player id for game \(game.name)")
+                }
+
+                let challengerRating = Rating(currentElo: CGFloat(challengerStats.elo), winner: !winner)
+                let contenderRating = Rating(currentElo: CGFloat(contenderStats.elo), winner: winner)
+
+                let newChallengerElo = challengerRating.calculate(versus: contenderRating)
+                let newContenderElo = contenderRating.calculate(versus: challengerRating)
+
+                return challengerStats
+                    .update(newChallengerElo, winner: !winner)
+                    .update(on: request).flatMap({ _ -> EventLoopFuture<HTTPStatus> in
+                        return contenderStats
+                            .update(newContenderElo, winner: winner)
+                            .update(on: request).transform(to: .ok)
                     })
-            }).transform(to: .ok)
+            })
+    }
+
+    static private func updateMatch(_ request: Request, status: MatchStatus, winner: Bool) throws -> Future<Match> {
+        let player = try request.requireAuthenticated(Player.self)
+        return try flatMap(to: Match.self,
+                           request.parameters.next(Game.self),
+                           request.parameters.next(Match.self)) { game, match in
+
+                            guard let playerId = player.id else {
+                                throw Abort(.notFound, reason: "Player id not found")
+                            }
+
+                            guard playerId == match.contenderId else {
+                                throw Abort(.forbidden, reason: "Only contender is able to update match.")
+                            }
+
+                            guard match.status == status.rawValue else {
+                                throw Abort(.forbidden, reason: "Match status should be \(status.rawValue) but it is \(match.status) ")
+                            }
+
+                            return try updateMatch(forMatch: match,
+                                               inGame: game,
+                                               withStatus: status,
+                                               winner: winner,
+                                               request)
+                                .update(on: request)
+        }
     }
 }

@@ -7,78 +7,36 @@
 
 import Vapor
 import Foundation
-import FluentSQLite
-
-enum GameStatus: Int {
-    case pending = 0
-    case accepted
-    case completed
-    case aborted
-}
+import FluentPostgreSQL
 
 final class Game: Codable {
-    var id: Int?
-    var challengerEmail: String
-    let contenderEmail: String
+    var id: UUID?
     let name: String
-    let challenger: String
-    let contender: String
-    let status: Int
-    
-    init(id: Int? = nil, name: String, challengerEmail: String, contenderEmail: String, challenger: String, contender: String, status: Int = GameStatus.pending.rawValue) {
+
+    /// Relation 1 Game for * PlayerStats
+    var playerStats: Children<Game, PlayerStats> {
+        return children(\PlayerStats.gameId)
+    }
+
+    /// Relation 1 Game for * Matches
+    var matches: Children<Game, Match> {
+        return children(\Match.gameId)
+    }
+
+    init(id: UUID? = nil, name: String) {
         self.id = id
         self.name = name
-        self.challengerEmail = challengerEmail
-        self.contenderEmail = contenderEmail
-        self.challenger = challenger
-        self.contender = contender
-        self.status = status
-    }
-
-    final class Create: Codable {
-        let name: String
-
-        init(name: String, contenderEmail: String) {
-            self.name = name
-        }
-    }
-    
-    final class Public: Codable {
-        let name: String
-        let challenger: String
-        let contender: String
-        let status: Int
-        
-        init(name: String, challenger: String, contender: String, status: Int) {
-            self.name = name
-            self.challenger = challenger
-            self.contender = contender
-            self.status = status
-        }
     }
 }
 
-extension Game: Model {
-    typealias Database = SQLiteDatabase
-    typealias ID = Int
-    public static var idKey: IDKey = \Game.id
+extension Game: Migration {
+    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+        return Database.create(self, on: connection) { builder in
+            try addProperties(to: builder)
+            builder.unique(on: \Game.name)
+        } }
 }
+
+extension Game: PostgreSQLUUIDModel {}
 extension Game: Content {}
 extension Game: Parameter {}
-extension Game: Migration {}
-
-extension Game.Public: Content {}
-
-extension Game {
-    func convertToPublic() -> Game.Public {
-        return Game.Public(name: name, challenger: challenger, contender: contender, status: status)
-    }
-}
-
-extension Future where T: Game {
-    func convertToPublic() -> Future<Game.Public> {
-        return self.map(to: Game.Public.self) { game in
-            return game.convertToPublic()
-        }
-    }
-}

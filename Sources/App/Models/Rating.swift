@@ -37,9 +37,9 @@ struct Rating {
         }
     }
     
-    func calculate(versusElo challengerElo: Int) -> Int {
+    func calculate(versus challengerRating: Rating) -> Int {
         let exh_elo = pow(10.0, self.elo/400.0)
-        let exh_challengerElo = pow(10.0, CGFloat(challengerElo)/400.0)
+        let exh_challengerElo = pow(10.0, challengerRating.elo/400.0)
         let expectedOutcome = exh_elo / (exh_elo + exh_challengerElo)
         
         let newElo = self.elo + (self.kFactor * (self.winnerFactor - expectedOutcome))

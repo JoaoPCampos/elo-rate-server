@@ -8,22 +8,21 @@ let package = Package(
         // 💧 A server-side Swift web framework.
         .package(url: "https://github.com/vapor/vapor.git", from: "3.0.0"),
 
-        // 🔵 Swift ORM (queries, models, relations, etc) built on SQLite 3.
-        .package(url: "https://github.com/vapor/fluent-sqlite.git", from: "3.0.0"),
+        // 🐘 Non-blocking, event-driven Swift client for PostgreSQL.
+        .package(url: "https://github.com/vapor/fluent-postgresql.git", from: "1.0.0"),
 
         // 🔐 Authentication package
         .package(url: "https://github.com/vapor/auth.git", from: "2.0.0-rc"),
 
         /// 📤 Mail service
         .package(url: "https://github.com/IBM-Swift/Swift-SMTP", .upToNextMinor(from: "5.1.0"))
-
     ],
     
     targets: [
         .target(name: "App",
                 dependencies: [
                     "Vapor",
-                    "FluentSQLite",
+                    "FluentPostgreSQL",
                     "Authentication",
                     "SwiftSMTP"]),
 
