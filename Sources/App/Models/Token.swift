@@ -7,8 +7,9 @@
 
 import Foundation
 import Vapor
-import FluentPostgreSQL
 import Authentication
+import FluentSQLite
+//import FluentPostgreSQL
 
 final class Token: Codable {
     var id: UUID?
@@ -39,7 +40,7 @@ extension Token {
     }
 }
 
-extension Token: PostgreSQLUUIDModel {}
+extension Token: SQLiteUUIDModel {}
 
 extension Token: Authentication.Token {
     typealias UserType = Player

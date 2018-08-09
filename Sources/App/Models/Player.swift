@@ -7,8 +7,9 @@
 
 import Vapor
 import Foundation
-import FluentPostgreSQL
 import Authentication
+import FluentSQLite
+//import FluentPostgreSQL
 
 final class Player: Codable {
     var id: UUID?
@@ -51,11 +52,11 @@ final class Player: Codable {
     }
 }
 
-extension Player: PostgreSQLUUIDModel {}
+extension Player: SQLiteUUIDModel {}
 extension Player: Content {}
 extension Player: Parameter {}
 extension Player: Migration {
-    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+    static func prepare(on connection: SQLiteConnection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
             builder.unique(on: \Player.email)

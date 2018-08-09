@@ -7,7 +7,8 @@
 
 import Vapor
 import Foundation
-import FluentPostgreSQL
+import FluentSQLite
+//import FluentPostgreSQL
 
 enum MatchStatus: String {
     case pending
@@ -59,11 +60,11 @@ final class Match: Codable {
 extension Match: PropertyDescribable {
     typealias Object = Match
 }
-extension Match: PostgreSQLUUIDModel {}
+extension Match: SQLiteUUIDModel {}
 extension Match: Content {}
 extension Match: Parameter {}
 extension Match: Migration {
-    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+    static func prepare(on connection: SQLiteConnection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
             builder.reference(from: \Match.challengerId, to: \Player.id)

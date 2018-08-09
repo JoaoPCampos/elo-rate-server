@@ -7,7 +7,8 @@
 
 import Vapor
 import Foundation
-import FluentPostgreSQL
+import FluentSQLite
+//import FluentPostgreSQL
 
 final class Game: Codable {
     var id: UUID?
@@ -30,13 +31,13 @@ final class Game: Codable {
 }
 
 extension Game: Migration {
-    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+    static func prepare(on connection: SQLiteConnection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
             builder.unique(on: \Game.name)
         } }
 }
 
-extension Game: PostgreSQLUUIDModel {}
+extension Game: SQLiteUUIDModel {}
 extension Game: Content {}
 extension Game: Parameter {}
