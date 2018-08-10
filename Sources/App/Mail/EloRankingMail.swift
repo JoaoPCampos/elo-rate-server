@@ -31,7 +31,7 @@ final class EloRankingMail {
         let recipients = [Mail.User(name: username, email: email)]
 
         htmlStr = htmlStr.replacingOccurrences(of: "{Username}", with: username)
-        htmlStr = htmlStr.replacingOccurrences(of: "{username:password}", with: "username : \(username) | password: \(newPassword)")
+        htmlStr = htmlStr.replacingOccurrences(of: "{Password}", with: newPassword)
 
         let htmlAttachment = Attachment(
             htmlContent: htmlStr
