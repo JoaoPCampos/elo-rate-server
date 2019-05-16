@@ -18,3 +18,9 @@
         <img src="http://img.shields.io/badge/swift-4.1-brightgreen.svg" alt="Swift 4.1">
     </a>
 </p>
+
+Documentation
+`https://elorate.docs.apiary.io`
+
+Base endpoint
+`https://jocs-elo-ranking-development.vapor.cloud/ranking/api/v1.0`
