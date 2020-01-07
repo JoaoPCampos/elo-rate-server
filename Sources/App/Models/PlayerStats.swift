@@ -7,7 +7,7 @@
 
 import Vapor
 import Foundation
-import FluentSQLite
+import FluentPostgreSQL
 //import FluentPostgreSQL
 
 final class PlayerStats: Codable {
@@ -50,11 +50,11 @@ final class PlayerStats: Codable {
     }
 }
 
-extension PlayerStats: SQLiteUUIDModel {}
+extension PlayerStats: PostgreSQLUUIDModel {}
 extension PlayerStats: Content {}
 extension PlayerStats: Parameter {}
 extension PlayerStats: Migration {
-    static func prepare(on connection: SQLiteConnection) -> Future<Void> {
+    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
             builder.reference(from: \PlayerStats.playerId, to: \Player.id)
