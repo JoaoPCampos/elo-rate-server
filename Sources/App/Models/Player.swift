@@ -42,11 +42,9 @@ final class Player: Codable {
     final class Public: Codable {
         var id: UUID?
         var username: String
-        var email: String
 
-        init(id: UUID? = nil, username: String, email: String) {
+        init(id: UUID? = nil, username: String) {
             self.username = username
-            self.email = email
             self.id = id
         }
     }
@@ -67,7 +65,7 @@ extension Player: Migration {
 extension Player.Public: Content {}
 extension Player {
     func convertToPublic() -> Player.Public {
-        return Player.Public(id: id, username: username, email: email)
+        return Player.Public(id: id, username: username)
     }
 }
 
