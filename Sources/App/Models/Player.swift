@@ -8,8 +8,7 @@
 import Vapor
 import Foundation
 import Authentication
-import FluentSQLite
-//import FluentPostgreSQL
+import FluentPostgreSQL
 
 final class Player: Codable {
     
@@ -57,12 +56,12 @@ final class Player: Codable {
     }
 }
 
-extension Player: SQLiteUUIDModel {}
+extension Player: PostgreSQLUUIDModel {}
 extension Player: Content {}
 extension Player: Parameter {}
 extension Player: Migration {
     
-    static func prepare(on connection: SQLiteConnection) -> Future<Void> {
+    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
         
         return Database.create(self, on: connection) { builder in
             

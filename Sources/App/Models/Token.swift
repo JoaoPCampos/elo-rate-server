@@ -8,8 +8,7 @@
 import Foundation
 import Vapor
 import Authentication
-import FluentSQLite
-//import FluentPostgreSQL
+import FluentPostgreSQL
 
 final class Token: Codable {
     
@@ -54,7 +53,7 @@ extension Token {
     }
 }
 
-extension Token: SQLiteUUIDModel {}
+extension Token: PostgreSQLUUIDModel {}
 
 extension Token: Authentication.Token {
     
