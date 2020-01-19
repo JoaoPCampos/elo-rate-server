@@ -6,13 +6,17 @@
 //
 
 extension EloRankingURL {
+    
     enum Auth {
+        
         case login
         case logout
         case recover
 
         var path: String {
+            
             switch self {
+            
             case .login:
                 return baseURL + "auth/login/"
 

@@ -10,11 +10,10 @@ import Crypto
 import Foundation
 
 final class PlayerController {
+    
     static func create(_ request: Request) throws -> Future<Player.Public> {
-        return try request
-            .content
-            .decode(Player.self)
-            .map({ player -> Player in
+        
+        return try request.content.decode(Player.self).map({ player -> Player in
 
                 let encriptedPassword = try BCrypt.hash(player.password)
 
@@ -26,65 +25,65 @@ final class PlayerController {
     }
 
     static func list(_ request: Request) throws -> Future<[Player.Public]> {
+        
         return Player.query(on: request).all().map({ players -> [Player.Public] in
+            
             return players.map { $0.convertToPublic() }
         })
     }
 
     static func stats(_ request: Request) throws -> Future<[PlayerStats]> {
+        
         let player = try request.requireAuthenticated(Player.self)
 
-        return try player
-            .playerStats
-            .query(on: request)
-            .all()
+        return try player.playerStats.query(on: request).all()
     }
 
     static func matches(_ request: Request) throws -> Future<[Match]> {
+        
         let player = try request.requireAuthenticated(Player.self)
 
-        return try player
-            .matchesAsChallenger
-            .query(on: request)
-            .all()
-            .flatMap({ challengerMatches -> EventLoopFuture<[Match]> in
-                return try player
-                    .matchesAsContender
-                    .query(on: request)
-                    .all().map({ (contenderMatches) -> [Match] in
-                        var allMatches = challengerMatches
-                        allMatches.append(contentsOf: contenderMatches)
-                        return allMatches
-                    })
+        return try player.matchesAsChallenger.query(on: request).all().flatMap({ challengerMatches -> EventLoopFuture<[Match]> in
+                
+            return try player.matchesAsContender.query(on: request).all().map({ contenderMatches -> [Match] in
+                        
+                var allMatches = challengerMatches
+                
+                allMatches.append(contentsOf: contenderMatches)
+                
+                return allMatches
             })
+        })
     }
 
     static func find(_ request: Request) throws -> Future<Player.Public> {
+        
         return try request.parameters.next(Player.self).convertToPublic()
     }
 
     static func update(_ request: Request) throws -> Future<Player.Public> {
-        return try createUpdatedPlayer(from: request)
-            .update(on: request)
-            .convertToPublic()
+        
+        return try createUpdatedPlayer(from: request).update(on: request).convertToPublic()
     }
 }
 
 extension PlayerController {
+    
     static func findPlayer( _ request: Request, byEmail email: String) throws -> Future<Player> {
-        return Player
-            .query(on: request)
-            .all()
-            .map({ players -> Player in
-                guard let player = players.filter({ $0.email == email }).first else {
-                    throw Abort(.notFound, reason: "Player with email \(email) not found.")
-                }
-
-                return player
-            })
+        
+        return Player.query(on: request).all().map({ players -> Player in
+                
+            guard let player = players.filter({ $0.email == email }).first else {
+                    
+                throw Abort(.notFound, reason: "Player with email \(email) not found.")
+            }
+            
+            return player
+        })
     }
 
     static private func createUpdatedPlayer(from request: Request) throws -> Player {
+        
         let oldPlayer = try request.requireAuthenticated(Player.self)
 
         /// Check which properties came in the request body to update Player with
@@ -93,7 +92,9 @@ extension PlayerController {
         let password: String? = try Player.describe(withKeyPath: \Player.password, for: request)
 
         var encriptedpassword = oldPlayer.password
+        
         if let password = password {
+            
             encriptedpassword = try BCrypt.hash(password)
         }
 

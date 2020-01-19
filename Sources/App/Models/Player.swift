@@ -12,6 +12,7 @@ import FluentSQLite
 //import FluentPostgreSQL
 
 final class Player: Codable {
+    
     var id: UUID?
     var email: String
     var username: String
@@ -19,20 +20,24 @@ final class Player: Codable {
 
     /// Relation 1 Player for * PlayerStats
     var playerStats: Children<Player, PlayerStats> {
+        
         return children(\PlayerStats.playerId)
     }
 
     /// Relation 1 Player for * matches as challenger
     var matchesAsChallenger: Children<Player, Match> {
+        
         return children(\Match.challengerId)
     }
 
     /// Relation 1 Player for * matches as contender
     var matchesAsContender: Children<Player, Match> {
+        
         return children(\Match.contenderId)
     }
 
     init(id: UUID? = nil, username: String, email: String, password: String) {
+        
         self.username = username
         self.email = email
         self.password = password
@@ -40,13 +45,13 @@ final class Player: Codable {
     }
 
     final class Public: Codable {
+        
         var id: UUID?
         var username: String
-        var email: String
 
-        init(id: UUID? = nil, username: String, email: String) {
+        init(id: UUID? = nil, username: String) {
+            
             self.username = username
-            self.email = email
             self.id = id
         }
     }
@@ -56,9 +61,13 @@ extension Player: SQLiteUUIDModel {}
 extension Player: Content {}
 extension Player: Parameter {}
 extension Player: Migration {
+    
     static func prepare(on connection: SQLiteConnection) -> Future<Void> {
+        
         return Database.create(self, on: connection) { builder in
+            
             try addProperties(to: builder)
+            
             builder.unique(on: \Player.email)
             builder.unique(on: \Player.username)
         } }
@@ -66,28 +75,36 @@ extension Player: Migration {
 
 extension Player.Public: Content {}
 extension Player {
+    
     func convertToPublic() -> Player.Public {
-        return Player.Public(id: id, username: username, email: email)
+        
+        return Player.Public(id: self.id, username: self.username)
     }
 }
 
 extension Future where T: Player {
+    
     func convertToPublic() -> Future<Player.Public> {
+        
         return self.map(to: Player.Public.self) { player in
+            
             return player.convertToPublic()
         }
     }
 }
 
 extension Player: PropertyDescribable {
+    
     typealias Object = Player
 }
 
 extension Player: BasicAuthenticatable {
+    
     static let usernameKey: UsernameKey = \Player.username
     static let passwordKey: PasswordKey = \Player.password
 }
 
 extension Player: TokenAuthenticatable {
+    
     typealias TokenType = Token
 }

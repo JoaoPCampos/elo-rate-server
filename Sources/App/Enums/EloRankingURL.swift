@@ -6,7 +6,9 @@
 //
 
 enum EloRankingURL {
+    
     static var baseURL: String {
-        return "ranking/api/v1.0/"
+        
+        return "ranking/api/"
     }
 }

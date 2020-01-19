@@ -6,7 +6,9 @@
 //
 
 extension EloRankingURL {
+    
     enum Player {
+        
         case create
         case list
         case find
@@ -15,9 +17,10 @@ extension EloRankingURL {
         case matches
 
         var path: String {
+            
             switch self {
-            case .create,
-                 .find:
+            
+            case .create, .find:
                 return baseURL + "player/"
                 
             case .list:

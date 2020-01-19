@@ -10,14 +10,24 @@ import SwiftSMTP
 import HTTP
 
 final class EloRankingMail {
-    static func send(_ request: Request, to email: String, subject: String, username: String, password newPassword: String) throws -> Future<HTTPStatus> {
+    
+    static func send(_ request: Request,
+                     to email: String,
+                     subject: String,
+                     username: String,
+                     password newPassword: String) throws -> Future<HTTPStatus> {
+        
         guard let emailPassword = Environment.get("EMAIL_PASSWORD") else {
+            
             throw Abort(.notFound, reason: "Password for sender email not found.")
         }
 
         let dir = try request.make(DirectoryConfig.self)
         let path =  dir.workDir + "Resources/Templates/recover_password.html"
-        guard let data = FileManager.default.contents(atPath: path), var htmlStr = String(data: data, encoding: .utf8) else {
+        
+        guard let data = FileManager.default.contents(atPath: path),
+            var htmlStr = String(data: data, encoding: .utf8) else {
+            
             throw Abort(.notFound, reason: "Email template file not found.")
         }
 
@@ -45,6 +55,7 @@ final class EloRankingMail {
         smtp.send(mail)
 
         return request.next().future().map({ _ -> HTTPStatus in
+            
             return .ok
         })
     }

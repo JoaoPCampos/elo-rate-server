@@ -12,22 +12,19 @@ final class EloRankingCORS {
     
     lazy private var eloRankingConfiguration: CORSMiddleware.Configuration = {
 
-        let headers: [HTTPHeaderName] = [
-            .accept,
-            .authorization,
-            .contentType,
-            .origin,
-            .xRequestedWith
-        ]
+        let headers: [HTTPHeaderName] = [.accept,
+                                         .authorization,
+                                         .contentType,
+                                         .origin,
+                                         .xRequestedWith]
 
         return CORSMiddleware.Configuration.init(allowedOrigin: CORSMiddleware.AllowOriginSetting.all,
-                                                 allowedMethods: [
-                                                    .GET,
-                                                    .POST,
-                                                    .PUT,
-                                                    .DELETE,
-                                                    .PATCH,
-                                                    .OPTIONS],
+                                                 allowedMethods: [.GET,
+                                                                  .POST,
+                                                                  .PUT,
+                                                                  .DELETE,
+                                                                  .PATCH,
+                                                                  .OPTIONS],
                                                  allowedHeaders: headers,
                                                  allowCredentials: true,
                                                  cacheExpiration: 600,
@@ -35,6 +32,7 @@ final class EloRankingCORS {
     }()
 
     func middleware() -> CORSMiddleware {
+        
         return CORSMiddleware(configuration: eloRankingConfiguration)
     }
 }

@@ -7,12 +7,16 @@
 import Vapor
 
 extension EloRankingURL {
+    
     enum Game {
+        
         case create
         case list
 
         var path: String {
+            
             switch self {
+            
             case .create:
                 return baseURL + "game/"
 

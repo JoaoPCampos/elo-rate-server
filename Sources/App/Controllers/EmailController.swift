@@ -14,6 +14,7 @@ final class EmailController {
         let newPassword = try CryptoRandom().generateData(count: 16).base64EncodedString()
 
         let hashedPassword = try BCrypt.hash(newPassword)
+        
         let updatePlayer = Player(id: player.id,
                                   username: player.username,
                                   email: player.email,
@@ -24,7 +25,9 @@ final class EmailController {
                                        subject: "Recover Password",
                                        username: player.username,
                                        password: newPassword)
-            .flatMap({ (status) -> EventLoopFuture<HTTPStatus> in
+            
+            .flatMap({ status -> EventLoopFuture<HTTPStatus> in
+                
                 return updatePlayer.update(on: request).transform(to: status)
             })
     }
